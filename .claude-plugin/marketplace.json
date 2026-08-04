@@ -1,20 +1,23 @@
 {
   "name": "open-code-review",
   "owner": {
-    "name": "alibaba"
+    "name": "haotool"
   },
-  "description": "AI-powered code review agent that reads Git diffs, analyzes changed files with LLM tool-use capabilities, and generates structured line-level review comments with cross-referential context awareness.",
+  "description": "Source-first, zero-network Open Code Review Delegate Edition for subscription-based coding agents.",
   "plugins": [
     {
-      "name": "open-code-review",
-      "source": "./plugins/open-code-review/claude-code",
-      "description": "Perform AI code review on Git diffs — supports workspace changes, branch ranges, and single commits with concurrent per-file analysis, codebase search, and deep context-aware review.",
+      "name": "open-code-review-delegate-codex",
+      "source": "./plugins/open-code-review",
+      "description": "Codex skill package for deterministic review scope and rules with the host agent performing the review.",
       "version": "1.0.0",
       "license": "Apache-2.0"
     },
     {
-      "name": "open-code-review-codex",
-      "source": "./plugins/open-code-review"
+      "name": "open-code-review",
+      "source": "./plugins/open-code-review/claude-code",
+      "description": "Claude Code delegate-review command and bundled skills using the zero-network ocr-delegate CLI.",
+      "version": "1.0.0",
+      "license": "Apache-2.0"
     }
   ]
 }

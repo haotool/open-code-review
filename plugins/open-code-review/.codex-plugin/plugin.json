@@ -1,34 +1,34 @@
 {
-  "name": "open-code-review-codex",
+  "name": "open-code-review-delegate-codex",
   "version": "1.0.0",
-  "description": "Use Alibaba Open Code Review from local Codex.",
+  "description": "Use the zero-network Open Code Review Delegate Edition from local Codex.",
   "author": {
-    "name": "Alibaba"
+    "name": "haotool"
   },
-  "homepage": "https://github.com/alibaba/open-code-review",
-  "repository": "https://github.com/alibaba/open-code-review",
+  "homepage": "https://github.com/haotool/open-code-review-delegate",
+  "repository": "https://github.com/haotool/open-code-review-delegate",
   "license": "Apache-2.0",
   "keywords": [
     "code-review",
     "codex",
-    "ocr",
+    "ocr-delegate",
     "open-code-review"
   ],
   "skills": "./skills/",
   "interface": {
-    "displayName": "Open Code Review",
-    "shortDescription": "Run structured code reviews from local Codex.",
-    "longDescription": "Adds a Codex skill that invokes the local Open Code Review CLI to review Git workspace changes, commits, and branch comparisons.",
-    "developerName": "Alibaba",
+    "displayName": "Open Code Review — Delegate Edition",
+    "shortDescription": "Run subscription-agent code reviews with a zero-network CLI.",
+    "longDescription": "Adds a Codex skill that uses ocr-delegate for deterministic scope and rules while Codex performs the review.",
+    "developerName": "haotool",
     "category": "Developer Tools",
     "capabilities": [
       "Read"
     ],
-    "websiteURL": "https://github.com/alibaba/open-code-review",
+    "websiteURL": "https://github.com/haotool/open-code-review-delegate",
     "defaultPrompt": [
-      "Use Open Code Review to review my current changes.",
-      "Use Open Code Review to review this branch against main.",
-      "Use Open Code Review to review and fix high-confidence issues."
+      "Use Open Code Review Delegate to review my current changes.",
+      "Use Open Code Review Delegate to review this branch against main.",
+      "Use Open Code Review Delegate to review and fix high-confidence issues."
     ]
   }
 }

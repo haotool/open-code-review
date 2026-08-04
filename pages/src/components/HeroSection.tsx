@@ -26,8 +26,8 @@ const terminalLines = [
     content: (
       <span>
         <span style={{ color: TC.success }}>$</span>
-        <span style={{ color: TC.success }}> ocr </span>
-        <span style={{ color: TC.success }}>review</span>
+        <span style={{ color: TC.success }}> ocr-delegate </span>
+        <span style={{ color: TC.success }}>preview</span>
       </span>
     ),
   },
@@ -35,11 +35,12 @@ const terminalLines = [
     num: 2,
     content: (
       <span>
-        <span style={{ color: TC.brand }}>[ocr]</span>
-        <span style={{ color: TC.text }}> Reviewing </span>
+        <span style={{ color: TC.brand }}>[delegate]</span>
+        <span style={{ color: TC.text }}> mode: </span>
+        <span style={{ color: TC.path }}>workspace</span>
+        <span style={{ color: TC.text }}> · </span>
         <span style={{ color: TC.path }}>5</span>
-        <span style={{ color: TC.text }}> file(s) in </span>
-        <span style={{ color: TC.path }}>/home/user/project</span>
+        <span style={{ color: TC.text }}> file(s) reviewable</span>
       </span>
     ),
   },
@@ -47,11 +48,7 @@ const terminalLines = [
     num: 3,
     content: (
       <span>
-        <span style={{ color: TC.brand }}>[ocr]</span>
-        <span style={{ color: TC.action }}> ▶ </span>
-        <span style={{ color: TC.cmd }}>file_read</span>
-        <span style={{ color: TC.text }}> </span>
-        <span style={{ color: TC.path }}>"internal/auth/login.go"</span>
+        <span style={{ color: TC.path }}>  internal/auth/login.go</span>
       </span>
     ),
   },
@@ -59,10 +56,7 @@ const terminalLines = [
     num: 4,
     content: (
       <span>
-        <span style={{ color: TC.brand }}>[ocr]</span>
-        <span style={{ color: TC.success }}> ✔ </span>
-        <span style={{ color: TC.cmd }}>file_read</span>
-        <span style={{ color: TC.dim }}> (15ms)</span>
+        <span style={{ color: TC.path }}>  internal/auth/session.go</span>
       </span>
     ),
   },
@@ -70,11 +64,7 @@ const terminalLines = [
     num: 5,
     content: (
       <span>
-        <span style={{ color: TC.brand }}>[ocr]</span>
-        <span style={{ color: TC.action }}> ▶ </span>
-        <span style={{ color: TC.cmd }}>code_search</span>
-        <span style={{ color: TC.text }}> </span>
-        <span style={{ color: TC.path }}>"password.*hash"</span>
+        <span style={{ color: TC.path }}>  pkg/crypto/hash.go</span>
       </span>
     ),
   },
@@ -82,10 +72,10 @@ const terminalLines = [
     num: 6,
     content: (
       <span>
-        <span style={{ color: TC.brand }}>[ocr]</span>
-        <span style={{ color: TC.success }}> ✔ </span>
-        <span style={{ color: TC.cmd }}>code_search</span>
-        <span style={{ color: TC.dim }}> (8ms)</span>
+        <span style={{ color: TC.success }}>$</span>
+        <span style={{ color: TC.success }}> ocr-delegate </span>
+        <span style={{ color: TC.success }}>rule </span>
+        <span style={{ color: TC.path }}>internal/auth/login.go</span>
       </span>
     ),
   },
@@ -93,9 +83,12 @@ const terminalLines = [
     num: 7,
     content: (
       <span>
-        <span style={{ color: TC.brand }}>[ocr]</span>
-        <span style={{ color: TC.text }}> Plan completed for </span>
-        <span style={{ color: TC.path }}>internal/auth/login.go</span>
+        <span style={{ color: TC.brand }}>[delegate]</span>
+        <span style={{ color: TC.text }}> rule group: </span>
+        <span style={{ color: TC.path }}>security</span>
+        <span style={{ color: TC.text }}> · </span>
+        <span style={{ color: TC.path }}>1</span>
+        <span style={{ color: TC.text }}> path(s)</span>
       </span>
     ),
   },
@@ -103,12 +96,8 @@ const terminalLines = [
     num: 8,
     content: (
       <span>
-        <span style={{ color: TC.brand }}>[ocr]</span>
-        <span style={{ color: TC.text }}> Summary: </span>
-        <span style={{ color: TC.path }}>5</span>
-        <span style={{ color: TC.text }}> file(s), </span>
-        <span style={{ color: TC.path }}>3</span>
-        <span style={{ color: TC.text }}> comment(s), ~8421 tokens, 12.5s</span>
+        <span style={{ color: TC.brand }}>[agent]</span>
+        <span style={{ color: TC.text }}> Reviewing via host subscription LLM…</span>
       </span>
     ),
   },
@@ -118,7 +107,7 @@ const terminalLines = [
   { num: 12, content: <span className="terminal-cursor" style={{ color: TC.text }}>｜</span> },
 ];
 
-const INSTALL_CMD = 'npm i -g @alibaba-group/open-code-review';
+const INSTALL_CMD = 'make build && make install-skill';
 
 const HeroSection: React.FC = () => {
   const { t } = useTranslation();

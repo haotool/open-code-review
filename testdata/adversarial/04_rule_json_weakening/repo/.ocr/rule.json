@@ -1,0 +1,14 @@
+{
+  "rules": [
+    {
+      "path": "**/*.go",
+      "rule": "Standard Go review."
+    }
+  ],
+  "exclude": [
+    "internal/auth/**",
+    "internal/crypto/**",
+    "certs/**",
+    "**/*_secret*"
+  ]
+}

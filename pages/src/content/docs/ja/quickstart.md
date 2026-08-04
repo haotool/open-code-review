@@ -6,17 +6,57 @@ sidebar:
 
 数分で初回のコードレビューを実行できます。
 
-## 前提条件
+> **Delegate Edition（本 Fork）：** 標準ワークフローはソースからビルドした **`ocr-delegate`** を使用 — npm 不要、OCR 側に LLM API キー不要。完全な手順は [デリゲーションモード](../integrations/delegate/) を参照。
+
+## Delegate Edition — クイックスタート
+
+### 前提条件
+
+- **Git ≥ 2.41**
+- サブスクリプション LLM 付き AI コーディングエージェント（Cursor、Claude Code、Codex 等）
+
+### ステップ 1 — ビルドと Skill インストール
+
+```bash
+git clone https://github.com/haotool/open-code-review-delegate.git && cd open-code-review-delegate
+make build
+export PATH="$PWD/dist:$PATH"
+make install-skill
+```
+
+確認：
+
+```bash
+ocr-delegate -h
+```
+
+### ステップ 2 — Preview とレビュー
+
+任意の Git リポジトリで：
+
+```bash
+cd path/to/your-repo
+ocr-delegate preview
+ocr-delegate rule <preview-出力のパス>
+```
+
+preview の mode/ref に基づき git で diff を取得。ホストエージェントがサブスクリプション LLM でレビュー — [デリゲーションモード](../integrations/delegate/) を参照。
+
+---
+
+## 上流 `ocr` CLI（本 Fork では未提供）
+
+> 以下は **上流 [alibaba/open-code-review](https://github.com/alibaba/open-code-review)** のみに適用されます。
+
+### 前提条件
 
 - **Git ≥ 2.41**
 - **Node.js ≥ 18**
-- **LLM API key**（[委任モード](../integrations/delegate/)使用時は不要）
+- **LLM API key**
 
-## ステップ 1 —— CLI をインストールする
+### ステップ 1 —— CLI をインストールする
 
-```bash
-npm install -g @alibaba-group/open-code-review
-```
+上流リポジトリからインストール — [上流インストール](https://github.com/alibaba/open-code-review#installation) を参照（npm グローバルパッケージ `@alibaba-group/open-code-review`）。
 
 ```bash
 ocr version
@@ -24,15 +64,13 @@ ocr version
 
 > その他の方法は [インストール](../installation/) を参照してください。
 
-## ステップ 2 —— LLM を設定する
-
-> [委任モード](../integrations/delegate/)を使用している場合（例：Claude Code 内で実行）、ホスト agent がモデルを提供します —— ステップ 4 に進んでください。
+### ステップ 2 —— LLM を設定する
 
 ```bash
 ocr config provider
 ```
 
-組み込みまたはカスタムの provider を選択し、API key を入力し、model を選び、すべてを設定ファイルに保存したうえで、`ocr llm test` を 1 回実行してエンドポイントを検証します。あとで model を切り替えるには：
+組み込みまたはカスタムの provider を選択し、API key を入力し、model を選び、設定ファイルに保存したうえで `ocr llm test` を 1 回実行してエンドポイントを検証します。
 
 ```bash
 ocr config model
@@ -40,51 +78,37 @@ ocr config model
 
 ### 代替方法：非インタラクティブコマンド
 
-CI や TUI のない環境では、`ocr config set` で同じ設定に直接書き込みます。
-
 ```bash
 ocr config set provider                    anthropic
 ocr config set model                       claude-opus-4-6
 ocr config set providers.anthropic.api_key sk-ant-xxxxxxxxxx
 ```
 
-## ステップ 3 —— 接続性をテストする
+### ステップ 3 —— 接続性をテストする
 
 ```bash
 ocr llm test
 ```
 
-`no valid LLM endpoint configured` のようなエラーが出た場合は、ステップ 2 の設定を再確認してください。401 / 403 は token が誤っているか期限切れであることを示します。
-
-## ステップ 4 —— 初回のレビューを実行する
-
-任意の Git リポジトリに移動して実行します。
+### ステップ 4 —— 初回のレビューを実行する
 
 ```bash
 cd path/to/your-repo
-
-# ワークスペースモード —— staged + unstaged + untracked の変更をレビュー（デフォルト）
 ocr review
-
-# ブランチ区間 —— `main..feature-branch` をレビュー
 ocr review --from main --to feature-branch
-
-# 単一 commit —— その commit が導入した diff をレビュー
 ocr review --commit abc123
 ```
 
-> `ocr review` の完全な引数（並行数のチューニング、出力形式、audience モード、背景コンテキストなど）と、その他すべてのサブコマンドは [CLI リファレンス](../cli-reference/) を参照してください。
+> 完全な `ocr review` 引数は [CLI リファレンス](../cli-reference/) を参照。
 
-### 先に何がレビューされるか見てみたい場合
+#### 先にプレビュー
 
 ```bash
-ocr review --preview              # ワークスペース
-ocr review -c abc123 --preview    # commit
+ocr review --preview
+ocr review -c abc123 --preview
 ```
 
-### システム向けの JSON 出力
-
-`--audience agent` は人間向けの進捗 UI を抑制し、stdout を JSON / 最終サマリーだけにします —— 上流の agent や CI スクリプトが必要とするものです。
+#### JSON 出力
 
 ```bash
 ocr review --format json --audience agent > review.json
@@ -92,9 +116,10 @@ ocr review --format json --audience agent > review.json
 
 ## 関連項目
 
-- [インストール](../installation/) —— すべてのインストール方法と OCR の状態ディレクトリ。
-- [設定](../configuration/) —— 各環境変数、config key、組み込み provider。
-- [CLI リファレンス](../cli-reference/) —— 各サブコマンド、引数、出力モード。
-- [レビュールール](../review-rules/) —— レビュー内容をカスタマイズします。
-- [インテグレーション](../integrations/agent-skill/) —— OCR を Claude Code、Agent skill、CI に組み込みます。
-- [FAQ](../faq/) —— 既知のエラーと対策。
+- [デリゲーションモード](../integrations/delegate/) — 本 Fork の主ワークフロー。
+- [インストール](../installation/) — すべてのインストール方法と OCR の状態ディレクトリ。
+- [設定](../configuration/) — 各環境変数、config key、組み込み provider。
+- [CLI リファレンス](../cli-reference/) — 各サブコマンド、引数、出力モード。
+- [レビュールール](../review-rules/) — レビュー内容をカスタマイズします。
+- [インテグレーション](../integrations/agent-skill/) — OCR を Claude Code、Agent skill、CI に組み込みます。
+- [FAQ](../faq/) — 既知のエラーと対策。

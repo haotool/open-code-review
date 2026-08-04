@@ -8,6 +8,7 @@ import { SearchTrigger } from '../components/SearchTrigger';
 import { useResponsive } from '../hooks/useResponsive';
 import { useCommandSearch, useSearchKeyboardNav } from '../hooks/useCommandSearch';
 import { getDocContent, getDocTitle, DocSlug, searchDocs } from '../content/docs';
+import ForkDocBanner from '../components/ForkDocBanner';
 import { extractHeadings } from '../utils/extractHeadings';
 import docContentsIcon from '../assets/icons/doc-contents.svg';
 import searchIcon from '../assets/icons/icon-search.svg';
@@ -419,6 +420,7 @@ const DocsPage: React.FC = () => {
           <h1 style={{ fontSize: 28, fontWeight: 700, color: '#FFFFFF', margin: '0 0 32px 0', lineHeight: '36px', fontFamily }}>
             {docTitle}
           </h1>
+          <ForkDocBanner slug={activeSlug} language={language} />
           {/* Rendered markdown content */}
           <MarkdownRenderer content={docContent} />
 

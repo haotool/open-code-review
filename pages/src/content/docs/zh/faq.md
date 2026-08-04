@@ -220,7 +220,7 @@ agent` 保证的干净 stdout 是*对解析器友好的*——要屏蔽一切，
 ```
 
 仓库路径通过把 `/` 和 `\` 替换为 `-`、`:` 替换为 `_` 编码
-（如 `/Users/foo/my-repo` → `Users-foo-my-repo`）。用 `ocr viewer` 浏览会话。
+（如 `/var/tmp/foo/my-repo` → `var-tmp-foo-my-repo`）。用 `ocr viewer` 浏览会话。
 删除该目录清除历史；OCR 在下次运行时重新生成编码路径。
 
 ## 性能与成本

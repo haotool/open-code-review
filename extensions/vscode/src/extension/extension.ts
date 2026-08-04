@@ -13,7 +13,7 @@ let disposables: vscode.Disposable[] = [];
 export function activate(context: vscode.ExtensionContext): void {
   const extensionUri = context.extensionUri;
   const output = vscode.window.createOutputChannel('Open Code Review');
-  const cli = new CliService('ocr');
+  const cli = new CliService('ocr-delegate');
   const config = new ConfigService(cli);
   const git = new GitService(output);
   const comments = new CommentProvider(extensionUri, git);

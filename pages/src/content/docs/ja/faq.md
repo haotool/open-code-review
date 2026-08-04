@@ -237,7 +237,7 @@ JSON モードでは `warnings` にも表示されます。
 ```
 
 リポジトリパスは、`/` と `\` を `-` に、`:` を `_` に置き換えてエンコードされます
-（例: `/Users/foo/my-repo` → `Users-foo-my-repo`）。`ocr viewer` でセッションを閲覧できます。
+（例: `/var/tmp/foo/my-repo` → `var-tmp-foo-my-repo`）。`ocr viewer` でセッションを閲覧できます。
 このディレクトリを削除すると履歴が消えます。OCR は次回実行時にエンコード済みパスを再生成します。
 
 ## パフォーマンスとコスト

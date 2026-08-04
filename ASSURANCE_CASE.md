@@ -1,27 +1,30 @@
 # Security Assurance Case
 
-This document provides a security assurance case for Open Code Review (OCR), justifying that security requirements are met through secure design principles and countermeasures against common implementation weaknesses.
+> **Scope: Delegate Edition (haotool fork)**
+> This assurance case applies to the delivered artifact **`ocr-delegate`** — a zero-network CLI plus the agent skill workflow. Threat identifiers **T1–T9** match [SECURITY.md](./SECURITY.md).
+> Sections marked **(upstream only)** describe the upstream `opencodereview` / `ocr` product (embedded LLM, viewer, npm distribution) and are **not** claims for this fork.
 
-## Threat Model
+## Threat Model (Delegate Edition)
 
 ### System Description
 
-OCR is a CLI tool that:
+In Delegate Edition, `ocr-delegate`:
 
 1. Reads git diff output from a local repository.
-2. Sends code diffs to a configured LLM provider (OpenAI, Anthropic, etc.) via HTTPS.
-3. Receives review comments from the LLM and presents them to the user.
-4. Optionally serves a local web viewer for browsing review session history.
+2. Resolves review rules from local JSON configuration.
+3. Emits preview/rule output to stdout for the **host agent** to consume.
+4. Makes **no outbound network calls** and holds **no LLM credentials**.
+
+The host agent (Cursor, Claude Code, etc.) performs the actual review using its subscription LLM — a user-informed choice outside the binary's trust boundary.
 
 ### Actors
 
 | Actor | Trust Level |
 |-------|-------------|
 | Local user | Trusted — invokes the CLI with full control over configuration |
-| LLM provider API | Semi-trusted — responses are validated before use |
+| Host agent + subscription LLM | Semi-trusted — must follow skill security discipline (T7) |
 | Git repository | Semi-trusted — diffs may contain adversarial content |
-| Network | Untrusted — all communication uses TLS |
-| Web browser (viewer) | Untrusted — may be exploited via DNS rebinding |
+| Network | **Not used by `ocr-delegate`** |
 
 ### Trust Boundaries
 
@@ -29,81 +32,106 @@ OCR is a CLI tool that:
 ┌──────────────────────────────────────────────────┐
 │  User Machine (Trusted Zone)                     │
 │                                                  │
-│  ┌──────────┐    ┌──────────┐    ┌────────────┐  │
-│  │ Git Repo │───▶│ OCR CLI  │───▶│ Local File │  │
-│  │ (diffs)  │    │ (core)   │    │  (output)  │  │
-│  └──────────┘    └────┬─────┘    └────────────┘  │
-│        Trust ────────▶│◀──────── Trust            │
-│        Boundary 1     │         Boundary 3        │
-│                       │                           │
-│                  ┌────┴─────┐                     │
-│                  │  Viewer  │◀── Trust Boundary 4  │
-│                  │ (HTTP)   │    (Browser access)  │
-│                  └──────────┘                     │
-└───────────────────────┼───────────────────────────┘
-           Trust ──────▶│◀────── Boundary 2
-                        │
-              ┌─────────┴──────────┐
-              │  LLM Provider API  │
-              │  (HTTPS only)      │
-              └────────────────────┘
+│  ┌──────────┐    ┌──────────────┐    ┌────────┐  │
+│  │ Git Repo │───▶│ ocr-delegate │───▶│ stdout │  │
+│  │ (diffs)  │    │ (deterministic)│   │ (data) │  │
+│  └──────────┘    └──────────────┘    └────────┘  │
+│        Trust ────────▶│                           │
+│        Boundary 1     │                           │
+│                       ▼                           │
+│              ┌─────────────────┐                  │
+│              │  Host Agent     │── Boundary 2     │
+│              │  (skill + LLM)  │   (user choice)  │
+│              └─────────────────┘                  │
+└──────────────────────────────────────────────────┘
 ```
 
-1. **Git → CLI**: Diff content may contain crafted payloads. Parsed with strict format validation.
-2. **CLI → LLM API**: API keys transmitted over HTTPS only. Responses validated before use.
-3. **CLI → Local output**: File writes constrained to the working directory.
-4. **Browser → Viewer**: Host-header allowlist enforces access control; blocks DNS rebinding.
+1. **Git → CLI**: Diff content may contain crafted payloads. Parsed with strict format validation; only `git` is invoked with hardcoded subcommands.
+2. **CLI → Host agent**: Preview/rule output is data. The skill instructs the agent to treat embedded text as untrusted (T7).
+3. **Host agent → Subscription LLM**: Out of scope for `ocr-delegate`; user configures the agent's LLM provider.
 
-### Threat Summary
+### Threat Summary (aligned with SECURITY.md)
 
-| ID | Threat | Boundary | Mitigation |
-|----|--------|----------|------------|
-| T1 | Command injection via crafted diff content | 1 | All external commands are `git` only, with hardcoded subcommands; no shell expansion; `--end-of-options` used to prevent flag injection |
-| T2 | API key leakage | 2 | Keys read from environment variables only; never logged, written to output files, or transmitted beyond the configured LLM endpoint |
-| T3 | Path traversal via LLM-suggested file paths | 3 | `pathutil.WithinBase()` validates all file paths against the repository root, both before and after symlink resolution |
-| T4 | DNS rebinding against local viewer | 4 | Host-header allowlist rejects requests from non-loopback origins; configurable via `OCR_VIEWER_ALLOWED_HOSTS` |
-| T5 | Man-in-the-middle on API communication | 2 | Go's `net/http` enforces TLS 1.2+ with full certificate verification by default; `InsecureSkipVerify` is never set |
-| T6 | Malicious LLM response | 2 | JSON schema validation on response structure; line number bounds checking against actual diff ranges |
-| T7 | Dependency vulnerabilities | All | `govulncheck` runs in CI; Dependabot monitors for updates; `go.sum` provides integrity verification |
+| ID | Threat | Mitigation |
+|----|--------|------------|
+| T1 | npm wrapper / prebuilt download chain exfiltration | Removed: no `npm i -g`, no `install.sh` prebuilt fetch, no auto-updater. Source build only (`make build`). |
+| T2 | Telemetry export | `internal/telemetry` excluded from `ocr-delegate` dependency closure (CI Gate 3). |
+| T3 | LLM provider endpoint strings in binary | `internal/llm` excluded from closure; CI Gate 4 string-scans artifact for forbidden provider domains. |
+| T4 | Local viewer / DNS rebinding | `internal/viewer` excluded from closure; no HTTP listeners in delivered binary. |
+| T5 | Session JSONL persistence residue | `internal/session` excluded; E2E verifies no new `~/.opencodereview` files after delegate runs. |
+| T6 | FileReader absolute-path defect (upstream) | Upstream code unchanged per fork policy; `file_read` tool not in delegate closure. |
+| T7 | Prompt injection via diff/rule content | Skill boundary: treat all preview output as data, not instructions. Adversarial fixtures in `testdata/adversarial/`. |
+| T8 | Upstream GitHub Action (LLM exfiltration in CI) | `action.yml` removed; examples marked upstream-only. |
+| T9 | Rule tampering (`.opencodereview/rule.json`) | Skill workflow flags rule changes as high-priority review targets. |
 
 ## Secure Design Principles
 
-The following analysis maps [Saltzer & Schroeder's design principles](https://ieeexplore.ieee.org/document/1451869) to the project's implementation.
+| Principle | How Applied (Delegate Edition) |
+|-----------|--------------------------------|
+| **Least privilege** | `CGO_ENABLED=0`. CLI requires no elevated permissions. Zero network capability. |
+| **Fail-safe defaults** | No credentials in binary. No listeners. Source-first distribution. |
+| **Complete mediation** | Git subprocesses use explicit argument lists; `--end-of-options` prevents flag injection. |
+| **Economy of mechanism** | External execution limited to `git` with hardcoded subcommands — no shell invocation. |
+| **Open design** | Apache-2.0. Security relies on verifiable closure and CI gates, not obscurity. |
+| **Separation of privilege** | Engineering (`ocr-delegate`) separated from review intelligence (host agent LLM). |
 
-| Principle | How Applied |
-|-----------|-------------|
-| **Least privilege** | `CGO_ENABLED=0` eliminates C library attack surface. The CLI requires no elevated permissions. No network listeners except the opt-in viewer. |
-| **Fail-safe defaults** | API keys must be explicitly provided via environment variables. The viewer binds to localhost by default; non-loopback hosts require explicit allowlisting. |
-| **Complete mediation** | Every viewer HTTP request is checked against the host allowlist (`internal/viewer/hostguard.go`). Every file path from agent tools is validated against the repository root (`internal/tool/filereader.go:98`, `internal/pathutil/path.go`). |
-| **Economy of mechanism** | External process execution is limited to `git` with hardcoded subcommands — no shell invocation, no arbitrary command execution. |
-| **Open design** | Fully open-source (Apache-2.0). Security relies on TLS, not obscurity. |
-| **Separation of privilege** | API authentication (keys) is separated from configuration (files). The viewer's host guard is a distinct middleware layer. |
-| **Least common mechanism** | Each review session writes to its own JSONL file. No shared state between sessions. |
-| **Psychological acceptability** | Security defaults (HTTPS, localhost binding, host allowlist) require no user configuration. Overrides (`OCR_VIEWER_ALLOWED_HOSTS`) are explicit and documented. |
-
-## Countermeasures Against Common Weaknesses
-
-The following maps [OWASP Top 10](https://owasp.org/www-project-top-ten/) and [CWE/SANS Top 25](https://cwe.mitre.org/top25/) categories to the project.
+## Countermeasures (Delegate Edition)
 
 | Weakness | Applicability | Countermeasure |
 |----------|---------------|----------------|
-| **A03:2021 Injection** (CWE-78 OS Command Injection) | All `exec.Command` calls use `git` with explicit argument lists — no shell interpolation. `--end-of-options` prevents flag injection. | Mitigated |
-| **A01:2021 Broken Access Control** (CWE-22 Path Traversal) | Agent file-read tool validates paths with `pathutil.WithinBase()` before and after symlink resolution (`internal/tool/filereader.go:91-112`). | Mitigated |
-| **A02:2021 Cryptographic Failures** | All API communication uses HTTPS/TLS 1.2+. Go's default TLS configuration is used without weakening. `InsecureSkipVerify` is never set. | Mitigated |
-| **A07:2021 Auth Failures** (CWE-798 Hard-coded Credentials) | API keys are read exclusively from environment variables, never embedded in code or config files, never logged. | Mitigated |
-| **A05:2021 Security Misconfiguration** | Secure defaults: localhost-only viewer, HTTPS-only API calls, `CGO_ENABLED=0`. The `go vet` and `govulncheck` tools run in CI. | Mitigated |
-| **A06:2021 Vulnerable Components** (CWE-1104) | Dependabot monitors Go modules and GitHub Actions. `govulncheck` runs on every push/PR. Dependencies are locked via `go.sum`. | Mitigated |
-| **A08:2021 Software Integrity** | Release binaries include SHA-256 checksums. Release tags are cryptographically signed (SSH). `CGO_ENABLED=0` produces static binaries with no external shared library dependencies. | Mitigated |
-| **A09:2021 Logging Failures** | API keys and sensitive headers are excluded from all log output and telemetry. | Mitigated |
-| **A10:2021 SSRF** | The CLI only makes outbound requests to user-configured LLM API endpoints. The viewer does not make outbound requests. | Not applicable |
-| **CWE-416 Use After Free / CWE-787 Out-of-bounds Write** | Go is a memory-safe language. `CGO_ENABLED=0` eliminates C memory risks. Race detector (`-race`) runs in CI. | Not applicable (memory-safe language) |
+| **Command injection** (CWE-78) | `git` only, explicit args, no shell | Mitigated |
+| **Path traversal** (CWE-22) | Delegate does not register upstream `file_read` tool (T6) | Not in delivery closure |
+| **Credential leakage** (CWE-798) | No API keys in binary or config reads | Mitigated |
+| **Vulnerable components** (CWE-1104) | `govulncheck` on delegate packages; Dependabot when enabled | Mitigated |
+| **Prompt injection** | Skill discipline + adversarial regression fixtures (T7) | Mitigated at skill boundary |
+| **Supply-chain / npm** (T1) | npm wrapper and prebuilt chain removed | Mitigated |
 
 ## Automated Verification
 
 | Check | Tool | When |
 |-------|------|------|
-| Static analysis | `go vet` | Every push and PR (CI) |
-| Known vulnerability scan | `govulncheck` | Every push and PR (CI) |
-| Data race detection | `go test -race` | Every push and PR (CI) |
-| Dependency monitoring | Dependabot | Continuous |
-| Build integrity | `CGO_ENABLED=0`, `go.sum` checksums | Every build |
+| Compile all packages | `go build ./...` | CI Gate 1 |
+| Format | `gofmt -s -l` | CI (fmt-check) |
+| Static analysis | `go vet` | CI / `make check` |
+| Unit + race tests | `make test` (`LC_ALL=C`, extensions excluded) | CI Gate 2 |
+| Coverage threshold | `make coverage` (≥ 80%) | CI |
+| Known vulnerabilities | `govulncheck` on delegate closure | CI |
+| Dependency closure | `go list -deps ./cmd/ocr-delegate` | CI Gate 3 |
+| Provider string scan | `strings dist/ocr-delegate` | CI Gate 4 |
+| Zero-network delegate | E2E `test/e2e/dryrun.sh` (S1, S4, S5, T5, adversarial) | CI |
+| Skill/plugin stub integrity | CI plugin-skill check | CI |
+| Dependency monitoring | Dependabot | Continuous (when enabled on fork) |
+
+### CI Gate Mapping (`.github/workflows/ci.yml`)
+
+| Gate | Step | Validates |
+|------|------|-----------|
+| **1** | `go build ./...` | All packages compile (upstream sync health) |
+| **2** | `make test` + `make coverage` | Full test suite with race detector; coverage ≥ 80% |
+| **3** | `go list -deps` closure check | No forbidden internal packages in `ocr-delegate` |
+| **4** | `make build` + `strings` scan | No LLM provider domain strings in artifact |
+
+Additional steps: `govulncheck`, `gofmt` check, `go vet`, E2E dry-run (S4: ripgrep for npm-free canonical install paths + delegate-only skill discipline).
+
+---
+
+## (Upstream Only) Extended Threat Model
+
+The following applies to upstream **alibaba/open-code-review** (`opencodereview` / `ocr` CLI), not Delegate Edition.
+
+### Additional Trust Boundaries (upstream)
+
+- **CLI → LLM API**: API keys over HTTPS; responses validated (T2 upstream sense: key leakage).
+- **CLI → Local output / viewer**: Path validation via `pathutil.WithinBase()`; host-header allowlist for viewer DNS rebinding (T4 upstream sense).
+
+### Upstream Threat Notes
+
+| Concern | Upstream mitigation |
+|---------|---------------------|
+| API key leakage | Keys from env only; never logged |
+| Path traversal via LLM-suggested paths | `pathutil.WithinBase()` in file-read tool |
+| DNS rebinding (viewer) | Host-header allowlist (`OCR_VIEWER_ALLOWED_HOSTS`) |
+| Malicious LLM response | JSON schema validation; line bounds checking |
+| TLS / MITM | Default Go TLS 1.2+; `InsecureSkipVerify` never set |
+
+For the full upstream assurance narrative, see [alibaba/open-code-review](https://github.com/alibaba/open-code-review).

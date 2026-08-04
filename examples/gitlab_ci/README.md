@@ -1,5 +1,7 @@
 # OpenCodeReview - GitLab CI Demo
 
+> **Fork notice (haotool Delegate Edition):** This example installs OCR via **npm** and runs the upstream **`ocr review`** CLI against an external LLM. **It is not supported in this fork** — use the [delegate skill](../../skills/open-code-review/SKILL.md) with `ocr-delegate` locally or in your agent instead. The content below is retained for upstream reference.
+
 This demo shows how to integrate OpenCodeReview into your GitLab CI/CD pipeline to automatically review Merge Requests and post review comments as inline discussions.
 
 ## How It Works

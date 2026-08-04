@@ -7,11 +7,12 @@ import (
 	"testing"
 
 	"github.com/alibaba/open-code-review/internal/config/rules"
+	"github.com/alibaba/open-code-review/internal/delegatecli"
 )
 
 func TestApplyCLIExcludes_Empty(t *testing.T) {
 	cc := &commonContext{FileFilter: &rules.FileFilter{Exclude: []string{"a"}}}
-	applyCLIExcludes(cc, nil)
+	delegatecli.ApplyExcludesToFilter(&cc.FileFilter, nil)
 	if len(cc.FileFilter.Exclude) != 1 {
 		t.Errorf("expected 1 exclude, got %d", len(cc.FileFilter.Exclude))
 	}
@@ -19,7 +20,7 @@ func TestApplyCLIExcludes_Empty(t *testing.T) {
 
 func TestApplyCLIExcludes_AppendsPatterns(t *testing.T) {
 	cc := &commonContext{FileFilter: &rules.FileFilter{Exclude: []string{"a"}}}
-	applyCLIExcludes(cc, []string{"b", "c"})
+	delegatecli.ApplyExcludesToFilter(&cc.FileFilter, []string{"b", "c"})
 	if len(cc.FileFilter.Exclude) != 3 {
 		t.Errorf("expected 3 excludes, got %d", len(cc.FileFilter.Exclude))
 	}
@@ -27,7 +28,7 @@ func TestApplyCLIExcludes_AppendsPatterns(t *testing.T) {
 
 func TestApplyCLIExcludes_NilFileFilter(t *testing.T) {
 	cc := &commonContext{}
-	applyCLIExcludes(cc, []string{"x"})
+	delegatecli.ApplyExcludesToFilter(&cc.FileFilter, []string{"x"})
 	if cc.FileFilter == nil {
 		t.Fatal("expected FileFilter to be created")
 	}

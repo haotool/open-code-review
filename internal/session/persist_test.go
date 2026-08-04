@@ -84,8 +84,8 @@ func TestEncodeRepoPath(t *testing.T) {
 			},
 			{
 				name:     "unix nested path",
-				input:    "/Users/john/dev/myapp",
-				expected: "Users-john-dev-myapp",
+				input:    "/opt/john/dev/myapp",
+				expected: "opt-john-dev-myapp",
 			},
 			{
 				name:     "unix root only",

@@ -1,0 +1,2 @@
+unknown sub-command: nope
+Run 'ocr-delegate -h' for usage

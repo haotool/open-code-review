@@ -6,10 +6,10 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
-	"strings"
 	"time"
 
 	"github.com/alibaba/open-code-review/internal/agent"
+	"github.com/alibaba/open-code-review/internal/delegatecli"
 	"github.com/alibaba/open-code-review/internal/mcp"
 	"github.com/alibaba/open-code-review/internal/session"
 	"github.com/alibaba/open-code-review/internal/telemetry"
@@ -34,31 +34,42 @@ func runReview(args []string) error {
 	if err != nil {
 		return err
 	}
-	applyCLIExcludes(cc, splitPaths(opts.excludes))
+	delegatecli.ApplyExcludesToFilter(&cc.FileFilter, delegatecli.SplitPaths(opts.excludes))
 
 	// Security (#112): reject ref-option injection before any git invocation.
-	if err := validateReviewRefs(cc.RepoDir, opts); err != nil {
+	if err := delegatecli.ValidateReviewRefs(cc.RepoDir, delegatecli.Options{
+		From:   opts.from,
+		To:     opts.to,
+		Commit: opts.commit,
+	}); err != nil {
 		return err
+	}
+
+	// Match delegatecli.LoadContext: merge --background-file before commit-message fallback.
+	if opts.backgroundFile != "" {
+		bgPath := delegatecli.ResolveBackgroundFilePath(cc.RepoDir, opts.backgroundFile)
+		fileBackground, err := delegatecli.LoadBackgroundFile(bgPath)
+		if err != nil {
+			return err
+		}
+		opts.background, err = delegatecli.MergeBackground(opts.background, fileBackground)
+		if err != nil {
+			return err
+		}
+	} else if opts.background != "" {
+		opts.background, err = delegatecli.SanitizeBackground(opts.background)
+		if err != nil {
+			return fmt.Errorf("inline background: %w", err)
+		}
 	}
 
 	if opts.commit != "" && opts.background == "" {
 		if msg, err := getCommitMessage(cc.RepoDir, opts.commit); err == nil && msg != "" {
-			opts.background = msg
+			opts.background, err = delegatecli.SanitizeBackground(msg)
+			if err != nil {
+				return fmt.Errorf("commit message background: %w", err)
+			}
 		}
-	}
-
-	// Only touch the background when --background-file is set, so the existing
-	// --background behaviour (raw, unsanitised) is preserved for users who do
-	// not opt into the file-based context.
-	if opts.backgroundFile != "" {
-		// Resolve relative paths against the git top-level (cc.RepoDir), matching
-		// file_read semantics, so `-B ./docs/context.md` works from any directory.
-		bgPath := resolveBackgroundFilePath(cc.RepoDir, opts.backgroundFile)
-		fileBackground, err := loadBackgroundFile(bgPath)
-		if err != nil {
-			return err
-		}
-		opts.background = mergeBackground(opts.background, fileBackground)
 	}
 
 	if opts.preview {
@@ -208,35 +219,6 @@ func requireGitRepo(dir string) error {
 	out, err := runGitCmd(repoDir, "rev-parse", "--git-dir")
 	if err != nil || len(out) == 0 {
 		return fmt.Errorf("%s is not a git repository, code review requires a valid git repository", repoDir)
-	}
-	return nil
-}
-
-// validateReviewRefs rejects ref-option injection (#112): any --from/--to/
-// --commit value must be a real commit ref and must not start with '-'.
-func validateReviewRefs(repoDir string, opts reviewOptions) error {
-	refs := []struct {
-		flag string
-		ref  string
-	}{
-		{"--from", opts.from},
-		{"--to", opts.to},
-		{"--commit", opts.commit},
-	}
-	for _, item := range refs {
-		if item.ref == "" {
-			continue
-		}
-		if strings.HasPrefix(item.ref, "-") {
-			return fmt.Errorf("%s value %q is not a valid git ref: refs must not start with '-'", item.flag, item.ref)
-		}
-		if out, err := runGitCmd(repoDir, "rev-parse", "--verify", "--end-of-options", item.ref+"^{commit}"); err != nil {
-			msg := strings.TrimSpace(string(out))
-			if msg != "" {
-				return fmt.Errorf("%s value %q is not a valid commit ref: %s", item.flag, item.ref, msg)
-			}
-			return fmt.Errorf("%s value %q is not a valid commit ref", item.flag, item.ref)
-		}
 	}
 	return nil
 }

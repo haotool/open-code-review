@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { Link } from 'react-router-dom';
 import { useTranslation } from '../i18n';
 import { useResponsive } from '../hooks/useResponsive';
 import { useSectionTitleStyle } from '../hooks/useResponsiveStyle';
@@ -8,6 +9,10 @@ import copyIcon from '../assets/icons/icon-copy.svg';
 import chevronDown from '../assets/icons/icon-chevron-down.svg';
 import chevronRight from '../assets/icons/icon-chevron-right.svg';
 import playIcon from '../assets/icons/icon-play.svg';
+
+const BUILD_CMD = `make build
+export PATH="$PWD/dist:$PATH"
+make install-skill`;
 
 /* Toast */
 const Toast: React.FC<{ message: string; visible: boolean }> = ({ message, visible }) =>
@@ -70,6 +75,15 @@ const QuickStartSection: React.FC = () => {
   const titleStyle = useSectionTitleStyle();
   const { toastVisible, handleCopy } = useCopyToast();
 
+  const reviewCmd = `${t('quickstart.commentPreview')}
+ocr-delegate preview
+
+${t('quickstart.commentBranch')}
+ocr-delegate preview --from main --to feature
+
+${t('quickstart.commentRule')}
+ocr-delegate rule <paths-from-preview>`;
+
   return (
     <section
       id="quickstart"
@@ -106,8 +120,8 @@ const QuickStartSection: React.FC = () => {
               <img src={chevronDown} alt="" style={{ width: 16, height: 16 }} />
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              <CodeBlock label={t('quickstart.step1Label1')} code="npm i -g @alibaba-group/open-code-review" onCopy={handleCopy} />
-              <CodeBlock label={t('quickstart.step1Label2')} code="ocr version" onCopy={handleCopy} />
+              <CodeBlock label={t('quickstart.step1Label1')} code={BUILD_CMD} multiline onCopy={handleCopy} />
+              <CodeBlock label={t('quickstart.step1Label2')} code="ocr-delegate -h" onCopy={handleCopy} />
             </div>
           </div>
 
@@ -126,17 +140,8 @@ const QuickStartSection: React.FC = () => {
               <img src={chevronRight} alt="" style={{ width: 16, height: 16 }} />
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              <CodeBlock label={t('quickstart.step2Label1')} code="ocr config provider" onCopy={handleCopy} />
-              <CodeBlock
-                label={t('quickstart.step2Label2')}
-                code={`ocr config set llm.url https://api.anthropic.com \\
-    && ocr config set llm.auth_token {{your-api-key}} \\
-    && ocr config set llm.model claude-opus-4-6 \\
-    && ocr config set llm.use_anthropic true`}
-                multiline
-                onCopy={handleCopy}
-              />
-              <CodeBlock label={t('quickstart.step2Label3')} code="ocr llm test" onCopy={handleCopy} />
+              <CodeBlock label={t('quickstart.step2Label1')} code="ocr-delegate preview" onCopy={handleCopy} />
+              <CodeBlock label={t('quickstart.step2Label2')} code="ocr-delegate preview --from main --to feature" onCopy={handleCopy} />
             </div>
           </div>
 
@@ -157,19 +162,20 @@ const QuickStartSection: React.FC = () => {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               <CodeBlock
                 label={t('quickstart.step3Label1')}
-                code={`${t('quickstart.commentReview')}
-ocr review
-
-${t('quickstart.commentBranch')}
-ocr review --from main --to feature-auth
-
-${t('quickstart.commentCommit')}
-ocr review --commit abc123`}
+                code={reviewCmd}
                 multiline
                 onCopy={handleCopy}
               />
             </div>
           </div>
+
+          {/* Upstream-only note */}
+          <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 12, textAlign: 'center', lineHeight: '20px', margin: 0 }}>
+            {t('quickstart.upstreamNote')}{' '}
+            <Link to="/docs/quickstart" style={{ color: 'rgba(255,255,255,0.45)', textDecoration: 'underline' }}>
+              {t('quickstart.upstreamLink')}
+            </Link>
+          </p>
         </div>
       </div>
       <Toast message={t('quickstart.copied')} visible={toastVisible} />

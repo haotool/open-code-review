@@ -1,192 +1,149 @@
 <div align="center">
-  <a href="https://open-codereview.ai">
-    <img src="imgs/logo-core.svg" alt="OpenCodeReview logo" width="180" />
-  </a>
-  <h1>OpenCodeReview</h1>
+  <h1>Open Code Review — Delegate Edition</h1>
+  <p><strong>Форк с усиленной безопасностью от <a href="https://github.com/haotool">haotool</a></strong></p>
 </div>
 
 <p align="center">
-  <a href="https://trendshift.io/repositories/41087?utm_source=repository-badge&amp;utm_medium=badge&amp;utm_campaign=badge-repository-41087" target="_blank" rel="noopener noreferrer">
-    <img src="https://trendshift.io/api/badge/repositories/41087" alt="alibaba%2Fopen-code-review | Trendshift" style="width: 280px; height: 60px;" width="280" height="60" />
-  </a>
-  <a href="https://trendshift.io/repositories/41087" target="_blank">
-    <img src="https://trendshift.io/api/badge/trendshift/repositories/41087/weekly?language=Go" alt="alibaba%2Fopen-code-review | Trendshift" style="width: 280px; height: 60px;" width="280" height="60" />
-  </a>
+  <a href="README.md">English</a> | <a href="README.zh-CN.md">简体中文</a> | <a href="README.zh-TW.md">繁體中文</a> | <a href="README.ja-JP.md">日本語</a> | <a href="README.ko-KR.md">한국어</a> | Русский
 </p>
+
 <p align="center">
-  <a href="https://www.npmjs.com/package/@alibaba-group/open-code-review"><img alt="npm" src="https://img.shields.io/npm/v/@alibaba-group/open-code-review?style=flat-square" /></a>
-  <a href="https://github.com/alibaba/open-code-review/actions/workflows/release.yml"><img alt="Build status" src="https://img.shields.io/github/actions/workflow/status/alibaba/open-code-review/release.yml?style=flat-square" /></a>
-  <a href="https://github.com/alibaba/open-code-review/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/github/license/alibaba/open-code-review?style=flat-square" /></a>
-  <a href="https://deepwiki.com/alibaba/open-code-review"><img alt="Ask DeepWiki" src="https://deepwiki.com/badge.svg" /></a>
-  <a href="https://www.bestpractices.dev/projects/13328"><img alt="OpenSSF Best Practices" src="https://img.shields.io/badge/OpenSSF-Silver-4C566A?style=flat-square" /></a>
-</p>
-<p align="center">
-  <a href="#supported-platforms"><img alt="Windows" src="https://img.shields.io/badge/Windows-supported-blue.svg" /></a>
-  <a href="#supported-platforms"><img alt="macOS" src="https://img.shields.io/badge/macOS-supported-blue.svg" /></a>
-  <a href="#supported-platforms"><img alt="Linux" src="https://img.shields.io/badge/Linux-supported-blue.svg" /></a>
-  <a href="#supported-agents"><img alt="Claude Code" src="https://img.shields.io/badge/Claude_Code-supported-blueviolet.svg" /></a>
-  <a href="#supported-agents"><img alt="Codex" src="https://img.shields.io/badge/Codex-supported-blueviolet.svg" /></a>
-  <a href="#supported-agents"><img alt="Cursor" src="https://img.shields.io/badge/Cursor-supported-blueviolet.svg" /></a>
-</p>
-<p align="center">
-  <a href="README.md">English</a> | <a href="README.zh-CN.md">简体中文</a> | <a href="README.ja-JP.md">日本語</a> | <a href="README.ko-KR.md">한국어</a> | Русский
+  <a href="https://github.com/haotool/open-code-review-delegate/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/haotool/open-code-review-delegate/ci.yml?style=flat-square" /></a>
+  <a href="LICENSE"><img alt="License" src="https://img.shields.io/github/license/haotool/open-code-review-delegate?style=flat-square" /></a>
+  <a href="https://github.com/alibaba/open-code-review"><img alt="Upstream" src="https://img.shields.io/badge/upstream-alibaba%2Fopen--code--review-blue?style=flat-square" /></a>
 </p>
 
 ---
 
-## Что такое Open Code Review?
+## Важное уведомление
 
-Open Code Review — это CLI-инструмент для код-ревью на основе ИИ. Он появился как внутренний официальный ИИ-ассистент код-ревью Alibaba Group: за последние два года им воспользовались десятки тысяч разработчиков, и он выявил миллионы дефектов в коде. После тщательной проверки в огромных масштабах мы превратили его в open-source-проект для сообщества. Чтобы начать работу, достаточно настроить эндпоинт модели.
+Этот репозиторий **не** является официальным продуктом Alibaba. Это независимый форк [haotool](https://github.com/haotool), производный от [alibaba/open-code-review](https://github.com/alibaba/open-code-review) под Apache License 2.0.
 
-Инструмент читает git-диффы, отправляет изменённые файлы настраиваемой LLM через агента с поддержкой вызова инструментов (tool use) и генерирует структурированные ревью-комментарии с точностью до строки. Агент может читать полное содержимое файлов, искать по кодовой базе, заглядывать в другие изменённые файлы за контекстом и выполнять глубокое ревью — а не только давать поверхностные замечания по диффу. Помимо ревью диффов, `ocr scan` позволяет проверять файлы целиком — удобно для аудита незнакомой кодовой базы или каталогов без значимого диффа.
+- Репозиторий: [`haotool/open-code-review-delegate`](https://github.com/haotool/open-code-review-delegate) (запросы к прежнему URL `haotool/open-code-review` перенаправляются автоматически).
+- Мы не используем товарные знаки Alibaba и не подразумеваем официальную поддержку.
+- Атрибуция авторских прав upstream — в [NOTICE](NOTICE).
+- Полные условия лицензии — в [LICENSE](LICENSE).
 
-Подробнее на [официальном сайте](https://open-codereview.ai).
+## Что это?
 
-![Highlights](imgs/highlights-en.png)
+Open Code Review (Delegate Edition) поставляет один CLI-бинарник **`ocr-delegate`** для детерминированной инженерии code review:
 
-## Бенчмарк
+- **Отбор файлов** — точное определение изменённых файлов для ревью
+- **Разрешение правил** — сопоставление правил из `rule.json` с каждым файлом
+- **Нулевой исходящий трафик** — бинарник не вызывает LLM и не открывает исходящие соединения
+- **Нулевые учётные данные** — API-ключи, токены и конфигурация провайдера не требуются
 
-> По сравнению с агентами общего назначения (Claude Code), Open Code Review при той же базовой модели достигает значительно более высоких показателей **Precision** и **F1**, потребляя лишь **~1/9 токенов** и выполняя ревью быстрее. При этом показатель Recall ниже, чем у агентов общего назначения — это осознанный компромисс в пользу точности и минимального шума.
+AI-агент (Cursor, Claude Code, Codex и т.д.) выполняет реальное ревью через свой LLM по подписке. `ocr-delegate` отвечает за инженерию; host agent — за интеллект.
 
-Бенчмарк на основе реальных код-ревью: **50** популярных open-source-репозиториев, **200** реальных Pull Request, **10** языков программирования — перекрёстная валидация 80+ старшими инженерами (**1 505** размеченных дефектов).
+Такая модель устраняет риски цепочки поставок от npm auto-updater, скачивания prebuilt-бинарников и встроенных endpoint провайдера в upstream-модели распространения.
 
-| Метрика | Что измеряет | Почему важна |
-|---------|-------------|--------------|
-| **F1** | Гармоническое среднее precision и recall | Лучший единый показатель качества ревью |
-| **Precision** | Доля найденных проблем, являющихся реальными дефектами | Выше = меньше ложных срабатываний |
-| **Recall** | Доля реальных дефектов, которые были найдены | Выше = меньше пропущенных проблем |
-| **Avg Time** | Время выполнения одного ревью | Влияет на задержки в CI-пайплайне |
-| **Avg Token** | Суммарное потребление токенов за ревью | Прямо влияет на стоимость API |
+## Быстрая установка (3 шага)
 
-![Benchmark](imgs/benchmark-en.png)
-
-## Почему Open Code Review?
-
-### Проблема агентов общего назначения
-
-Если вы использовали для код-ревью агентов общего назначения, например Claude Code со Skills, вы наверняка сталкивались с этими болевыми точками:
-
-- **Неполное покрытие** — на крупных ченджсетах агенты склонны «срезать углы»: выборочно проверяют часть файлов и пропускают остальные.
-- **Дрейф позиций** — найденные проблемы часто не совпадают с реальным местом в коде: номера строк и ссылки на файлы «уезжают» от цели.
-- **Нестабильное качество** — Skills, управляемые естественным языком, трудно отлаживать, и качество ревью заметно колеблется при небольших изменениях промпта.
-
-Первопричина: чисто языковая архитектура не накладывает жёстких ограничений на процесс ревью.
-
-### Ключевая идея: детерминированная инженерия × агент
-
-Ключевая философия Open Code Review — сочетать детерминированную инженерию и агента так, чтобы каждый занимался тем, что у него получается лучше всего.
-
-**Детерминированная инженерия — жёсткие гарантии**
-
-Для тех шагов ревью, где *нельзя ошибаться*, корректность гарантирует инженерная логика, а не языковая модель:
-
-- **Точный отбор файлов** — точно определяет, какие файлы нуждаются в ревью, а какие следует отфильтровать, гарантируя, что ни одно важное изменение не будет упущено.
-- **Умный бандлинг файлов** — группирует связанные файлы в одну единицу ревью (например, `message_en.properties` и `message_zh.properties` объединяются вместе). Каждый бандл выполняется как суб-агент с изолированным контекстом — стратегия «разделяй и властвуй», которая сохраняет стабильность на очень больших ченджсетах и естественным образом поддерживает конкурентное ревью.
-- **Тонкий матчинг правил** — сопоставляет правила ревью с характеристиками каждого файла, удерживая внимание модели сфокусированным и устраняя информационный шум у самого источника. По сравнению с чисто языковым управлением правилами матчинг правил на основе шаблонизатора стабильнее и предсказуемее.
-- **Внешние модули позиционирования и рефлексии** — независимые модули позиционирования комментариев и рефлексии над комментариями системно повышают точность как расположения, так и содержания замечаний ИИ.
-
-**Агент — динамические решения**
-
-Сильные стороны агента сосредоточены там, где они важнее всего, — в динамических решениях и динамическом доборе контекста:
-
-- **Промпты, заточенные под сценарий** — шаблоны промптов, глубоко оптимизированные под код-ревью: выше качество при меньшем расходе токенов.
-- **Набор инструментов, заточенный под сценарий** — выведен из глубокого анализа трейсов вызовов инструментов на больших продакшен-данных, включая распределение частоты вызовов, долю повторных вызовов каждого инструмента и влияние новых инструментов на всю цепочку вызовов. В результате получился специализированный набор инструментов, который для код-ревью стабильнее и предсказуемее, чем универсальный агентский тулкит.
-
-## Как использовать
-
-### Предварительные требования
-
-- **Git >= 2.41** — Open Code Review использует Git для генерации diff, поиска по коду и операций с репозиторием.
-
-### CLI
-
-#### Установка
+Сборка из исходников — без npm, prebuilt-бинарников и API-ключей:
 
 ```bash
-npm install -g @alibaba-group/open-code-review
+# 1. Clone
+git clone https://github.com/haotool/open-code-review-delegate.git && cd open-code-review-delegate
+
+# 2. Сборка ocr-delegate
+make build
+
+# 3. Установка agent skill
+make install-skill
+# Для Claude Code:
+make install-skill SKILL_DIR=~/.claude/skills
 ```
 
-После установки команда `ocr` доступна глобально.
-
-Другие способы установки (скрипт установки, бинарный файл из GitHub Release, сборка из исходников) описаны в [руководстве по установке](https://open-codereview.ai/docs/installation).
-
-#### Быстрый старт
-
-**1. Настройте LLM**
-
-Перед запуском ревью необходимо настроить LLM, если только вы не используете [режим делегирования](https://open-codereview.ai/docs/delegate).
+Проверка:
 
 ```bash
-ocr config provider          # Выбрать встроенного провайдера или добавить пользовательский
-ocr config model             # Выбрать модель для активного провайдера
+which ocr-delegate && ocr-delegate -h
 ```
 
-![Provider setup](imgs/providers.jpg)
+Установка проверяется `test/e2e/dryrun.sh` ([E2E-верификация](test/e2e/README.md)).
 
-Интерактивный UI проведёт вас через выбор провайдера, ввод API-ключа и настройку модели, после чего автоматически проверит подключение.
+## Использование
 
-Настройка через CLI, переменные окружения, пользовательские провайдеры и другие расширенные параметры описаны в [руководстве по конфигурации](https://open-codereview.ai/docs/configuration).
+`skills/open-code-review/SKILL.md` — единый источник истины для delegate workflow.
 
-**2. Запустите ревью**
+### 1. Preview — определить область
 
 ```bash
-cd your-project
-
-# Режим рабочей копии — ревью всех staged, unstaged и untracked изменений
-ocr review
-
-# Диапазон веток — сравнение двух ref'ов
-ocr review --from main --to feature-branch
-
-# Один коммит
-ocr review --commit abc123
-
-# Возобновить прерванное ревью диапазона или одного коммита
-ocr session list
-ocr review --from main --to feature-branch --resume <session-id>
-
-# Полнофайловое сканирование — ревью целых файлов вместо диффа (история git не нужна)
-ocr scan                          # сканировать весь репозиторий
-ocr scan --path internal/agent    # сканировать каталог или конкретные файлы
-
-# Режим делегирования — AI-агент сам выполняет ревью
-# OCR отвечает за выбор файлов и разрешение правил; настройка LLM не требуется
-ocr delegate preview
-ocr delegate rule src/main.go src/handler.go
+ocr-delegate preview [--from main --to feature] [--commit <hash>] [-b "context"]
 ```
 
-## Документация
+### 2. Правила для файлов
 
-Полная документация доступна на **[open-codereview.ai/docs](https://open-codereview.ai/docs)**:
+```bash
+ocr-delegate rule <path1> <path2> ...
+```
 
-- [Быстрый старт](https://open-codereview.ai/docs/quickstart) — установка и запуск первого ревью
-- [Установка](https://open-codereview.ai/docs/installation) — все платформы и менеджеры пакетов
-- [Справочник CLI](https://open-codereview.ai/docs/cli-reference) — все команды и флаги
-- [Правила ревью](https://open-codereview.ai/docs/review-rules) — кастомизация правил ревью, фильтрация и таргетинг по путям
-- [Конфигурация](https://open-codereview.ai/docs/configuration) — ключи конфигурации и переменные окружения
-- [MCP-сервер](https://open-codereview.ai/docs/mcp) — расширение агента ревью внешними инструментами
-- Интеграции с кодинг-агентами — выберите используемую платформу
-  - [Claude Code](plugins/open-code-review/README.md#claude-code) — установка плагина со slash-командами для ревью
-  - [Codex](plugins/open-code-review/README.md#codex) — установка плагина с вызываемыми навыками ревью
-  - [Cursor](plugins/open-code-review/README.md#cursor) — установка плагина с переносимыми навыками ревью
-  - [OpenCode](plugins/open-code-review/opencode/README.md) — установка нативных инструментов ревью и slash-команд
-  - [Агенты с поддержкой Skill](https://open-codereview.ai/docs/agent-skill) — установка переносимого навыка агента
-- Режимы выполнения ревью — после интеграции выберите, какая LLM выполняет ревью
-  - [По умолчанию (под управлением OCR)](https://open-codereview.ai/docs/configuration) — OCR выполняет ревью с помощью настроенной LLM
-  - [Режим делегирования](https://open-codereview.ai/docs/delegate) — кодинг-агент выполняет ревью с помощью собственной LLM; API-ключ для OCR не требуется
-- [Интеграция с CI/CD](https://open-codereview.ai/docs/cicd) — GitHub Actions, GitLab CI, GitFlic CI и Gerrit
-- [Просмотр сессий](https://open-codereview.ai/docs/viewer) — просмотр и воспроизведение сессий ревью в браузере
-- [Телеметрия](https://open-codereview.ai/docs/telemetry) — интеграция с OpenTelemetry для наблюдаемости
-- [FAQ](https://open-codereview.ai/docs/faq) — частые вопросы и устранение неполадок
+### 3. Diff и ревью
 
-## Участие в разработке
+Используйте git по mode/ref из preview. Host agent формирует структурированные findings.
 
-Этот проект существует благодаря всем, кто вносит свой вклад. В [CONTRIBUTING.ru-RU.md](CONTRIBUTING.ru-RU.md) описаны настройка окружения разработки, рекомендации по коду и порядок отправки pull request'ов.
+Полный workflow, дисциплина безопасности (T7/T9) и схема вывода — в [документации skill](skills/open-code-review/SKILL.md).
 
-<a href="https://github.com/alibaba/open-code-review/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=alibaba/open-code-review" />
-</a>
+Формально поддерживаемые пути установки для Codex, Claude Code и Cursor — в [матрице поддержки агентов](docs/AGENT_SUPPORT.md).
 
-## Лицензия
+## Позиция по безопасности
 
-[Apache-2.0](LICENSE) — Copyright 2026 Alibaba
+| Свойство | Гарантия |
+|----------|----------|
+| Нулевой исходящий | Без сетевых соединений (CI string scan + E2E) |
+| Нулевые учётные данные | Конфигурация LLM-провайдера не нужна в delegate mode |
+| Минимальное замыкание зависимостей | Запрещённые модули (`internal/llm`, `telemetry`, `mcp`, `viewer`, `session`) исключены |
+| Распространение из исходников | Без npm-обёртки, prebuilt-скачиваний и auto-updater |
+| Обрезанная цепочка поставок | Удалены upstream install scripts, npm-пакеты и GitHub Action |
+
+Подробнее: [SECURITY.md](SECURITY.md)
+
+## Воспроизведение сборки
+
+Этот форк **source-first**: prebuilt-бинарники не публикуются.
+
+```bash
+make build                          # создаёт dist/ocr-delegate
+shasum -a 256 dist/ocr-delegate     # локальная контрольная сумма
+
+# Кросс-платформенная локальная сборка (опционально)
+make dist                           # все платформы + sha256sum.txt
+```
+
+## Разработка
+
+```bash
+make build       # сборка ocr-delegate
+make test        # тестовый набор
+make check       # fmt + vet + mod tidy
+make coverage    # отчёт покрытия (порог 80%)
+```
+
+См. [CONTRIBUTING.ru-RU.md](CONTRIBUTING.ru-RU.md).
+
+## Legacy-директории upstream
+
+Сохранены из upstream, но **не поддерживаются** в этом форке:
+
+| Каталог | Статус |
+|---------|--------|
+| `pages/` | Landing upstream — не собирается и не деплоится этим форком |
+| `extensions/` | VS Code extension upstream — требует полный `ocr` CLI, не `ocr-delegate` |
+
+## Лицензия и атрибуция
+
+[Apache-2.0](LICENSE). Уведомления об авторских правах upstream Alibaba сохранены в [NOTICE](NOTICE).
+
+Форк существенно изменяет upstream. Изменения v1.0.0 — в [CHANGELOG.md](CHANGELOG.md).
+
+## Чеклист релиза (S1–S7)
+
+| ID | Требование | Проверка |
+|----|------------|----------|
+| S1 | Нулевая исходящая сеть | `test/e2e/dryrun.sh` + CI Gate 4 string scan |
+| S2 | Нулевые ключи | E2E dry-run + delegate-only binary |
+| S3 | Детерминированный движок | Golden suite из 26 сценариев |
+| S4 | Source-first + delegate-only skill | Без npm/postinstall в путях установки; skill ссылается только на `ocr-delegate` (не полный `ocr` CLI / внешний LLM API) |
+| S5 | Установка ≤3 шагов | E2E dry-run трёхшаговая проверка |
+| S6 | Тесты проходят | CI Gate 2 (`go test ./...`) |
+| S7 | Устойчивость к инъекциям | Adversarial fixture library + E2E spot-checks |

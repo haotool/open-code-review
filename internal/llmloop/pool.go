@@ -38,11 +38,19 @@ type CommentWorkerPool struct {
 	resultsMu sync.Mutex
 	results   []model.LlmComment
 
-	// keys tracks per-key WaitGroups so callers can drain only the units
+	// keys tracks per-key wait state so callers can drain only the units
 	// submitted under one key (e.g. one reviewed file) without waiting for
 	// — or racing — submissions made under other keys.
 	keysMu sync.Mutex
-	keys   map[string]*sync.WaitGroup
+	keys   map[string]*keyWait
+}
+
+// keyWait pairs a WaitGroup with a mutex that serializes wg.Add against
+// wg.Wait on the same key. sync.WaitGroup forbids Add concurrent with Wait;
+// awaitMu enforces that even when callers interleave SubmitFor/AwaitKey.
+type keyWait struct {
+	wg      sync.WaitGroup
+	awaitMu sync.Mutex
 }
 
 // NewCommentWorkerPool creates a pool with the given concurrency limit.
@@ -72,16 +80,19 @@ func (p *CommentWorkerPool) Submit(f func() ([]model.LlmComment, error)) {
 func (p *CommentWorkerPool) SubmitFor(key string, f func() ([]model.LlmComment, error)) {
 	p.keysMu.Lock()
 	if p.keys == nil {
-		p.keys = make(map[string]*sync.WaitGroup)
+		p.keys = make(map[string]*keyWait)
 	}
-	kwg := p.keys[key]
-	if kwg == nil {
-		kwg = &sync.WaitGroup{}
-		p.keys[key] = kwg
+	kw := p.keys[key]
+	if kw == nil {
+		kw = &keyWait{}
+		p.keys[key] = kw
 	}
-	kwg.Add(1)
 	p.keysMu.Unlock()
-	p.submit(f, kwg)
+
+	kw.awaitMu.Lock()
+	kw.wg.Add(1)
+	kw.awaitMu.Unlock()
+	p.submit(f, &kw.wg)
 }
 
 func (p *CommentWorkerPool) submit(f func() ([]model.LlmComment, error), kwg *sync.WaitGroup) {
@@ -138,10 +149,12 @@ func (p *CommentWorkerPool) Await() []model.LlmComment {
 // returns immediately.
 func (p *CommentWorkerPool) AwaitKey(key string) {
 	p.keysMu.Lock()
-	kwg := p.keys[key]
+	kw := p.keys[key]
 	p.keysMu.Unlock()
-	if kwg == nil {
+	if kw == nil {
 		return
 	}
-	kwg.Wait()
+	kw.awaitMu.Lock()
+	kw.wg.Wait()
+	kw.awaitMu.Unlock()
 }

@@ -1,5 +1,7 @@
 # OpenCodeReview Landing Page (`pages/`)
 
+> **Fork notice:** This directory is retained from upstream [alibaba/open-code-review](https://github.com/alibaba/open-code-review) and is **not maintained or deployed** by the [haotool/open-code-review-delegate](https://github.com/haotool/open-code-review-delegate) fork. The fork ships `ocr-delegate` via source build only.
+
 This directory contains the OpenCodeReview landing page, built with TypeScript, React, Webpack, and Tailwind CSS.
 
 ## Getting Started

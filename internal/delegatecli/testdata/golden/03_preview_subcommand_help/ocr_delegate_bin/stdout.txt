@@ -1,0 +1,3 @@
+Usage: ocr-delegate preview [flags]
+
+Outputs reviewable file list with mode/ref metadata for the host agent to construct git commands.

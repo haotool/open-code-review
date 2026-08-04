@@ -1,10 +1,10 @@
-<p align="center">
-  English | <a href="README.zh-CN.md">简体中文</a>
-</p>
-
 # Open Code Review (VS Code Extension)
 
-A VS Code code-review extension built on the [`open-code-review`](https://www.npmjs.com/package/@alibaba-group/open-code-review) (`ocr`) CLI. It recreates the prototype experience with a Preact WebView and brings AI code review into the editor: start reviews from the sidebar, stream logs live, and apply / dismiss / flag-as-false-positive each comment inline — kept in sync with the sidebar both ways.
+> **Delegate Edition:** Preview and rule resolution via **`ocr-delegate`**; full LLM review via your **host agent skill** (`make install-skill`). This extension is **preview-oriented** in Delegate Edition — it lists changed files and opens diffs; start LLM review from Cursor, Claude Code, or Codex using the installed skill.
+
+A VS Code code-review extension built on the Open Code Review CLI. It recreates the prototype experience with a Preact WebView and brings AI code review into the editor: start reviews from the sidebar, stream logs live, and apply / dismiss / flag-as-false-positive each comment inline — kept in sync with the sidebar both ways.
+
+> **Note:** The "Start review" action in Delegate Edition shows a clear message instead of invoking upstream `ocr review`. Use `ocr-delegate preview` / `rule` through your host agent for LLM-powered review.
 
 ---
 
@@ -23,13 +23,16 @@ A VS Code code-review extension built on the [`open-code-review`](https://www.np
 
 ## Prerequisites
 
-1. Install the `ocr` CLI globally:
+1. Build `ocr-delegate` from the repo root and ensure it is on `PATH`:
 
    ```bash
-   npm i -g @alibaba-group/open-code-review
+   git clone https://github.com/haotool/open-code-review-delegate && cd open-code-review-delegate
+   make build
+   export PATH="$PWD/dist:$PATH"
+   which ocr-delegate
    ```
 
-2. Configure a working LLM (endpoint, API key, model). Configure it via the CLI directly, or in the extension's config view:
+2. Configure a working LLM (endpoint, API key, model) when using full `ocr` review features. Configure via the CLI or the extension config view when available:
 
    ```bash
    ocr config set llm.url https://api.anthropic.com/v1/messages
@@ -48,7 +51,7 @@ A VS Code code-review extension built on the [`open-code-review`](https://www.np
 
 - Node.js ≥ 18, with **Yarn** as the package manager (the repo ships a `yarn.lock`).
 - VS Code ≥ 1.74.
-- A globally available `ocr` CLI (see "Prerequisites" above) — the extension is essentially a GUI front-end for `ocr`.
+- A built `ocr-delegate` binary on `PATH` (see "Prerequisites" above) — the extension probes `ocr-delegate --version` during environment setup.
 
 ### Start the dev environment
 

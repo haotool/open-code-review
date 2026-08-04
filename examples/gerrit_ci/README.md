@@ -1,5 +1,7 @@
 # OpenCodeReview - Gerrit CI Demo
 
+> **Fork notice (haotool Delegate Edition):** This example installs OCR via **npm** and runs the upstream **`ocr review`** CLI against an external LLM. **It is not supported in this fork** — use the [delegate skill](../../skills/open-code-review/SKILL.md) with `ocr-delegate` locally or in your agent instead. The content below is retained for upstream reference.
+
 This demo shows how to integrate OpenCodeReview into a [Gerrit](https://www.gerritcodereview.com) code-review flow to automatically review changes and post the findings as inline comments on the patchset, plus a summary message.
 
 Like the GitHub Actions, GitLab CI, and GitFlic examples, the posting glue lives in the CI layer rather than in the `ocr` binary. Here it is a small, dependency-free Python script — [`post_review.py`](post_review.py) — that reads `ocr review --format json` and posts it as **one batched ReviewInput** to Gerrit's set-review endpoint, so a review lands atomically: inline comments grouped per file plus a summary message, in a single request.

@@ -1,11 +1,13 @@
-.PHONY: build test clean run help fmt vet check coverage \
+.PHONY: build build-full test clean run help fmt vet fmt-check doc-whitespace-check check coverage install-skill \
+	plugin-check delegate-surface-check host-agent-smoke \
 	build-all dist sha256sum version-info \
 	build-linux-amd64 build-linux-arm64 build-darwin-amd64 build-darwin-arm64 \
 	build-windows-amd64 build-windows-arm64
 
-BINARY_NAME := opencodereview
-GO          := go
-DIST_DIR    := ./dist
+DELEGATE_BINARY := ocr-delegate
+FULL_BINARY     := opencodereview
+GO              := go
+DIST_DIR        := ./dist
 
 # Version info — use git tag if available, fallback to short commit hash
 GIT_TAG     := $(shell git describe --tags --abbrev=0 2>/dev/null || echo "")
@@ -22,14 +24,36 @@ LD_FLAGS    := \
 RELEASE_LD_FLAGS := -s -w $(LD_FLAGS)
 
 define BUILD_PLATFORM
-	GOOS=$(1) GOARCH=$(2) CGO_ENABLED=0 $(GO) build -ldflags "$(RELEASE_LD_FLAGS)" \
-		-o $(DIST_DIR)/$(BINARY_NAME)-$(1)-$(2)$(3) \
-		./cmd/opencodereview
+	GOOS=$(1) GOARCH=$(2) CGO_ENABLED=0 $(GO) build -trimpath -ldflags "$(RELEASE_LD_FLAGS)" \
+		-o $(DIST_DIR)/$(DELEGATE_BINARY)-$(1)-$(2)$(3) \
+		./cmd/ocr-delegate
 endef
 
 # ── Development targets ──────────────────────────────────────────────────────
 build:
-	$(GO) build -ldflags "$(LD_FLAGS)" -o $(DIST_DIR)/$(BINARY_NAME) ./cmd/opencodereview
+	CGO_ENABLED=0 $(GO) build -trimpath -ldflags "$(RELEASE_LD_FLAGS)" \
+		-o $(DIST_DIR)/$(DELEGATE_BINARY) ./cmd/ocr-delegate
+
+build-full:
+	$(GO) build -ldflags "$(LD_FLAGS)" -o $(DIST_DIR)/$(FULL_BINARY) ./cmd/opencodereview
+
+SKILL_DIR ?= $(HOME)/.cursor/skills
+SKILL_SRC := skills/open-code-review
+SKILL_DELEGATE_SRC := skills/open-code-review-delegate
+
+install-skill:
+	mkdir -p $(SKILL_DIR)/open-code-review $(SKILL_DIR)/open-code-review-delegate
+	cp -R $(SKILL_SRC)/. $(SKILL_DIR)/open-code-review/
+	cp -R $(SKILL_DELEGATE_SRC)/. $(SKILL_DIR)/open-code-review-delegate/
+
+plugin-check:
+	bash test/ci/check-plugin-skills.sh
+
+delegate-surface-check:
+	bash test/ci/check-delegate-surface.sh
+
+host-agent-smoke:
+	bash test/e2e/host-agent-smoke.sh
 
 PACKAGES := $(shell $(GO) list ./... | grep -v /extensions/)
 
@@ -51,11 +75,11 @@ coverage:
 clean:
 	rm -rf $(DIST_DIR) coverage.out
 
-run: build
-	$(DIST_DIR)/$(BINARY_NAME) --staged
+run: build-full
+	$(DIST_DIR)/$(FULL_BINARY) --staged
 
 help: build
-	$(DIST_DIR)/$(BINARY_NAME) -h
+	$(DIST_DIR)/$(DELEGATE_BINARY) -h
 
 fmt:
 	gofmt -s -w .
@@ -63,13 +87,25 @@ fmt:
 vet:
 	LC_ALL=C $(GO) vet $(PACKAGES)
 
+fmt-check:
+	@unformatted=$$(gofmt -s -l $$( $(GO) list -f '{{.Dir}}' $(PACKAGES) )); \
+	if [ -n "$$unformatted" ]; then \
+		echo "FAIL: gofmt needed on:"; \
+		echo "$$unformatted"; \
+		exit 1; \
+	fi; \
+	echo "fmt-check passed"
+
+doc-whitespace-check:
+	@bash test/ci/check-doc-whitespace.sh
+
 check:
 	$(GO) mod tidy
 	gofmt -s -w .
 	LC_ALL=C $(GO) vet $(PACKAGES)
 	@echo "check passed"
 
-# ── Cross-platform targets ───────────────────────────────────────────────────
+# ── Cross-platform targets (local reproduction only; no release upload) ───────
 build-linux-amd64:
 	$(call BUILD_PLATFORM,linux,amd64)
 
@@ -90,11 +126,9 @@ build-windows-arm64:
 
 build-all: build-linux-amd64 build-linux-arm64 build-darwin-amd64 build-darwin-arm64 build-windows-amd64 build-windows-arm64
 
-# Generate SHA256 checksums for all release binaries
 sha256sum: build-all
-	cd $(DIST_DIR) && shasum -a 256 $(BINARY_NAME)-* | sort > sha256sum.txt
+	cd $(DIST_DIR) && shasum -a 256 $(DELEGATE_BINARY)-* | sort > sha256sum.txt
 
-# Full release: clean → build all platforms → checksums
 dist: clean build-all sha256sum
 	@echo $(VERSION) > $(DIST_DIR)/VERSION
 

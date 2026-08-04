@@ -167,33 +167,27 @@ func TestCommentWorkerPool_AwaitKeyWaitsForOwnKey(t *testing.T) {
 // comment work while other files' loops keep submitting. A pool-wide Await in
 // this pattern misuses sync.WaitGroup ("Add called concurrently with Wait");
 // the keyed API must stay panic-free.
+//
+// Producers use a bounded submit count (not a busy loop) so the test completes
+// reliably under -race on Darwin CI runners.
 func TestCommentWorkerPool_AwaitKeyConcurrentSubmitOtherKey(t *testing.T) {
 	p := NewCommentWorkerPool(4)
 
-	stop := make(chan struct{})
 	var submits atomic.Int64
 	var producerWg sync.WaitGroup
 	for i := 0; i < 4; i++ {
 		producerWg.Add(1)
 		go func() {
 			defer producerWg.Done()
-			for {
-				select {
-				case <-stop:
-					return
-				default:
-					p.SubmitFor("producer.go", func() ([]model.LlmComment, error) {
-						return nil, nil
-					})
-					submits.Add(1)
-				}
+			for j := 0; j < 400; j++ {
+				p.SubmitFor("producer.go", func() ([]model.LlmComment, error) {
+					return nil, nil
+				})
+				submits.Add(1)
 			}
 		}()
 	}
 
-	// Concurrently drain per-goroutine keys that occasionally have real work.
-	// Each key is used by exactly one goroutine (submit-then-await in program
-	// order), matching the per-file usage in the review path.
 	var drained atomic.Int64
 	var drainerWg sync.WaitGroup
 	for i := 0; i < 4; i++ {
@@ -211,7 +205,6 @@ func TestCommentWorkerPool_AwaitKeyConcurrentSubmitOtherKey(t *testing.T) {
 		}()
 	}
 	drainerWg.Wait()
-	close(stop)
 	producerWg.Wait()
 
 	if drained.Load() != 800 {
@@ -220,6 +213,7 @@ func TestCommentWorkerPool_AwaitKeyConcurrentSubmitOtherKey(t *testing.T) {
 	if submits.Load() == 0 {
 		t.Error("producers never submitted")
 	}
+	p.AwaitKey("producer.go")
 	p.Await()
 }
 

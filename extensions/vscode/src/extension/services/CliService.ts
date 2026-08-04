@@ -1,8 +1,6 @@
-import { t, resolveLocale } from '../../shared/i18n';
-import * as vscode from 'vscode';
 import { spawn } from 'child_process';
 import { CliResult, CliRunOptions, EnvCheckResult, LogLine } from '../../shared/types';
-import { buildReviewArgs, extractCliError, parseCliResult, parseLogLine } from './cliParse';
+import { extractCliError, parseLogLine } from './cliParse';
 import { getShellEnv, resolveBin } from './shellEnv';
 
 export class CliService {
@@ -10,7 +8,7 @@ export class CliService {
   private envCache: { env: EnvCheckResult; at: number } | null = null;
   private static readonly ENV_CACHE_TTL_MS = 5 * 60 * 1000;
 
-  constructor(private cliPath: string = 'ocr') {}
+  constructor(private cliPath: string = 'ocr-delegate') {}
 
   invalidateEnvironmentCache(): void {
     this.envCache = null;
@@ -30,9 +28,10 @@ export class CliService {
     return env.ocr.ok;
   }
 
-  private probeCommand(bin: string, args: string[]): Promise<{ ok: boolean; version?: string }> {
+  private probeCommand(bin: string): Promise<{ ok: boolean; version?: string }> {
     return new Promise((resolve) => {
-      const proc = spawn(resolveBin(bin), args, { env: getShellEnv() });
+      // shell: true is safe here because args are hardcoded ['--version'] — no user input.
+      const proc = spawn(resolveBin(bin), ['--version'], { env: getShellEnv(), shell: process.platform === 'win32' });
       let stdout = '';
       let errored = false;
       proc.stdout?.on('data', (d) => { stdout += d.toString(); });
@@ -53,51 +52,22 @@ export class CliService {
       const cached = this.getCachedEnvironment();
       if (cached) return cached;
     }
-    const node = await this.probeCommand('node', ['--version']);
-    const npm = node.ok ? await this.probeCommand('npm', ['--version']) : { ok: false };
-    const ocr = node.ok && npm.ok
-      ? await this.probeCommand(this.cliPath, ['--version'])
-      : { ok: false };
+    const node = await this.probeCommand('node');
+    const npm = node.ok ? await this.probeCommand('npm') : { ok: false };
+    // ocr-delegate is probed independently — Delegate Edition does not require npm install.
+    const ocr = await this.probeCommand(this.cliPath);
     const env = { node, npm, ocr };
     this.envCache = { env, at: Date.now() };
     return env;
   }
 
-  /** 全局安装 ocr CLI，流式回显 npm 日志，按 exit code 返回是否成功。 */
+  /** npm グローバルインストールは Delegate Edition では提供されません。 */
   install(onLog: (l: LogLine) => void): Promise<boolean> {
-    return new Promise((resolve) => {
-      const args = [
-        'install', '-g', '@alibaba-group/open-code-review',
-        '--loglevel', 'http', '--no-progress',
-      ];
-      onLog({ text: `$ npm ${args.join(' ')}`, level: 'info' });
-      const proc = spawn(resolveBin('npm'), args, {
-        // 非 TTY 下 npm 默认静默进度条；强制关进度条并用行式输出
-        env: { ...getShellEnv(), npm_config_progress: 'false', npm_config_color: 'false' },
-        shell: process.platform === 'win32',
-      });
-      // npm 输出可能跨 chunk 断行，按 \r\n 归一并逐行 emit，尾部残行留到下次。
-      const emitLines = (() => {
-        let buf = '';
-        return (chunk: string, level: LogLine['level'], flush = false) => {
-          buf += chunk.replace(/\r/g, '\n');
-          const parts = buf.split('\n');
-          buf = flush ? '' : (parts.pop() ?? '');
-          for (const line of parts) if (line.trim()) onLog({ text: line, level });
-          if (flush && chunk.trim() && parts.length === 0) onLog({ text: chunk, level });
-        };
-      })();
-      proc.stdout?.on('data', (d) => emitLines(d.toString(), 'info'));
-      proc.stderr?.on('data', (d) => emitLines(d.toString(), 'info'));
-      proc.on('error', (err) => { onLog({ text: String(err), level: 'error' }); resolve(false); });
-      proc.on('close', (code) => {
-        emitLines('', 'info', true);
-        const locale = resolveLocale(vscode.env.language);
-        onLog({ text: code === 0 ? t(locale, 'ext.cli.installOk') : `${t(locale, 'ext.cli.installFail')}${code})`, level: code === 0 ? 'info' : 'error' });
-        if (code === 0) this.invalidateEnvironmentCache();
-        resolve(code === 0);
-      });
+    onLog({
+      text: 'npm install is not supported in Delegate Edition — build ocr-delegate from source (make build)',
+      level: 'error',
     });
+    return Promise.resolve(false);
   }
 
   /** 运行任意参数，流式回调日志，结束返回 stdout 全文。退出码非 0 时 reject，并带上 CLI 报错文本。 */
@@ -134,8 +104,13 @@ export class CliService {
   }
 
   async review(opts: CliRunOptions, cwd: string, onLog: (l: LogLine) => void): Promise<CliResult> {
-    const stdout = await this.runRaw(buildReviewArgs(opts), cwd, onLog);
-    return parseCliResult(stdout);
+    void opts;
+    void cwd;
+    const msg =
+      'Delegate Edition: full LLM review runs via the host agent skill (ocr-delegate preview/rule). ' +
+      'This extension provides file preview only — use your agent to complete the review.';
+    onLog({ text: msg, level: 'error' });
+    throw new Error(msg);
   }
 
   async testConnection(options?: { configPath?: string; home?: string }): Promise<{ ok: boolean; message?: string }> {
@@ -158,7 +133,10 @@ export class CliService {
     if (this.current && this.current.pid) {
       this.current.kill('SIGTERM');
       const proc = this.current;
-      setTimeout(() => { if (!proc.killed) proc.kill('SIGKILL'); }, 3000);
+      const forceKillTimer = setTimeout(() => {
+        if (proc.exitCode === null && proc.signalCode === null) proc.kill('SIGKILL');
+      }, 3000);
+      proc.once('close', () => clearTimeout(forceKillTimer));
     }
   }
 }

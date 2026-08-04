@@ -4,7 +4,11 @@
 
 # Open Code Review (VSCode 插件)
 
-基于 [`open-code-review`](https://www.npmjs.com/package/@alibaba-group/open-code-review) (`ocr`) CLI 的 VSCode 代码审查插件。以 Preact WebView 还原原型交互体验，把 AI 代码审查能力集成进编辑器：在侧边栏发起审查、流式查看日志、在编辑器内逐条应用/忽略/标记误报评论，并与侧边栏双向同步。
+> **Delegate Edition：** 通过 **`ocr-delegate`** 做 preview/规则解析；完整 LLM 审查通过 **宿主 Agent Skill**（`make install-skill`）完成。Delegate Edition 下本插件为 **预览导向** — 展示变更文件并打开 diff；请在 Cursor、Claude Code 或 Codex 中使用已安装的 Skill 发起 LLM 审查。
+
+基于 Open Code Review CLI 的 VSCode 代码审查插件。以 Preact WebView 还原原型交互体验，把 AI 代码审查能力集成进编辑器：在侧边栏发起审查、流式查看日志、在编辑器内逐条应用/忽略/标记误报评论，并与侧边栏双向同步。
+
+> **说明：** Delegate Edition 下「开始审查」会提示使用宿主 Agent，而非调用上游 `ocr review`。请通过宿主 Agent 运行 `ocr-delegate preview` / `rule` 完成 LLM 审查。
 
 ---
 
@@ -23,13 +27,16 @@
 
 ## 前置依赖
 
-1. 全局安装 `ocr` CLI：
+1. 在仓库根目录构建 `ocr-delegate` 并确保其在 `PATH` 上：
 
    ```bash
-   npm i -g @alibaba-group/open-code-review
+   git clone https://github.com/haotool/open-code-review-delegate && cd open-code-review-delegate
+   make build
+   export PATH="$PWD/dist:$PATH"
+   which ocr-delegate
    ```
 
-2. 配置可用的 LLM（接口地址、API Key、模型）。可用 CLI 直接配置，或在插件内的配置视图填写：
+2. 使用完整 `ocr` 审查功能时需配置可用的 LLM（接口地址、API Key、模型）。可用 CLI 直接配置，或在插件内的配置视图填写：
 
    ```bash
    ocr config set llm.url https://api.anthropic.com/v1/messages
@@ -48,7 +55,7 @@
 
 - Node.js ≥ 18，包管理器使用 **Yarn**（仓库自带 `yarn.lock`）。
 - VS Code ≥ 1.74。
-- 全局可用的 `ocr` CLI（见上文「前置依赖」），插件本质上是 `ocr` 的图形前端。
+- `PATH` 上可用的 `ocr-delegate` 二进制（见上文「前置依赖」）— 插件在环境初始化时会探测 `ocr-delegate --version`。
 
 ### 启动开发环境
 

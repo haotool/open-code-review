@@ -14,84 +14,85 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  test:
-    runs-on: self-hosted
+  guard:
+    runs-on: ubuntu-latest
     timeout-minutes: 15
-    container:
-      image: golang:1.26.5
     steps:
       - uses: actions/checkout@v4
 
-      - name: Trust workspace
-        run: git config --global --replace-all safe.directory '*'
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
 
-      - name: Check formatting
-        run: |
-          unformatted="$(gofmt -s -l .)"
-          if [ -n "$unformatted" ]; then
-            echo "::error::Not gofmt-clean. Run 'gofmt -s -w .' and commit:"
-            echo "$unformatted"
-            gofmt -s -d .
-            exit 1
-          fi
+      # Gate 1 — upstream sync health (ADR ④)
+      - name: Build all packages
+        run: go build ./...
 
-      - name: Check go.mod is tidy
-        run: |
-          go mod tidy
-          if ! git diff --exit-code -- go.mod go.sum; then
-            echo "::error::go.mod/go.sum are not tidy. Run 'go mod tidy' and commit the diff above."
-            exit 1
-          fi
+      - name: Format check
+        run: make fmt-check
+
+      - name: Doc whitespace check
+        run: make doc-whitespace-check
 
       - name: Vet
-        run: go vet ./...
+        run: make vet
+
+      # Gate 2 — test suite (S6); race + same package filter as Makefile test target
+      - name: Test
+        run: make test
+
+      - name: Coverage threshold
+        run: make coverage
 
       - name: Govulncheck
         run: |
           go install golang.org/x/vuln/cmd/govulncheck@latest
-          govulncheck ./...
+          govulncheck ./cmd/ocr-delegate/... ./internal/delegatecli/... ./internal/preview/...
 
-      - name: Test with coverage
+      - name: Install ripgrep
         run: |
-          go test -v -race -count=1 -coverprofile=coverage.out ./...
-          go tool cover -func=coverage.out | grep total: | awk '{print $3}'
+          if command -v rg >/dev/null 2>&1; then
+            echo "ripgrep already installed"
+          elif command -v apt-get >/dev/null 2>&1; then
+            sudo apt-get update && sudo apt-get install -y ripgrep
+          elif command -v brew >/dev/null 2>&1; then
+            brew install ripgrep
+          else
+            echo "FAIL: ripgrep not available"; exit 1
+          fi
 
-      - name: Check coverage threshold
+      - name: Plugin skill package check
+        run: bash test/ci/check-plugin-skills.sh
+
+      # Gate 5 — Delegate Edition surface guard; prevent removed upstream
+      # distribution entry points from being reintroduced by syncs.
+      - name: Delegate surface check
+        run: bash test/ci/check-delegate-surface.sh
+
+      - name: E2E dry-run
+        # S4: ripgrep checks npm-free canonical paths + delegate-only skill discipline
+        run: bash test/e2e/dryrun.sh
+
+      # Gate 3 — dependency closure (ADR ③)
+      - name: Check ocr-delegate dependency closure
         run: |
-          COVERAGE=$(go tool cover -func=coverage.out | grep total: | awk '{print $3}' | sed 's/%//')
-          echo "Total coverage: ${COVERAGE}%"
-          if awk "BEGIN {exit !($COVERAGE < 80)}"; then
-            echo "FAIL: Coverage ${COVERAGE}% is below 80% threshold"
+          count="$(go list -deps ./cmd/ocr-delegate | grep -cE 'open-code-review/internal/(llm|llmloop|telemetry|mcp|viewer|session)' || true)"
+          if [ "$count" -ne 0 ]; then
+            echo "FAIL: ocr-delegate pulls $count forbidden internal packages"
+            go list -deps ./cmd/ocr-delegate | grep -E 'open-code-review/internal/(llm|llmloop|telemetry|mcp|viewer|session)' || true
             exit 1
           fi
-          echo "PASS: Coverage ${COVERAGE}% meets 80% threshold"
+          echo "PASS-closure"
 
-      - name: Build
-        run: go build -o /dev/null ./cmd/opencodereview
-
-  cross-compile:
-    runs-on: self-hosted
-    timeout-minutes: 10
-    container:
-      image: golang:1.26.5
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - {goos: linux,   goarch: arm64}
-          - {goos: darwin,  goarch: amd64}
-          - {goos: darwin,  goarch: arm64}
-          - {goos: windows, goarch: amd64}
-          - {goos: windows, goarch: arm64}
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Trust workspace
-        run: git config --global --replace-all safe.directory '*'
-
-      - name: Build ${{ matrix.goos }}/${{ matrix.goarch }}
-        env:
-          GOOS: ${{ matrix.goos }}
-          GOARCH: ${{ matrix.goarch }}
-          CGO_ENABLED: '0'
-        run: go build -o /dev/null ./...
+      # Gate 4 — artifact string scan for provider endpoint domains (T3)
+      - name: Build ocr-delegate and scan strings
+        run: |
+          make build
+          count="$(strings dist/ocr-delegate | grep -cE 'dashscope|aliyuncs|volces|bigmodel|moonshot\.cn|xiaomimimo|minimaxi|qianfan|tencentmaas|xf-yun' || true)"
+          if [ "$count" -ne 0 ]; then
+            echo "FAIL: dist/ocr-delegate contains $count forbidden provider domain strings"
+            strings dist/ocr-delegate | grep -E 'dashscope|aliyuncs|volces|bigmodel|moonshot\.cn|xiaomimimo|minimaxi|qianfan|tencentmaas|xf-yun' || true
+            exit 1
+          fi
+          echo "PASS-strings"

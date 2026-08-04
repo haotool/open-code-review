@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/alibaba/open-code-review/internal/config/template"
+	"github.com/alibaba/open-code-review/internal/delegatecli"
 	"github.com/alibaba/open-code-review/internal/llmloop"
 	"github.com/alibaba/open-code-review/internal/scan"
 	"github.com/alibaba/open-code-review/internal/telemetry"
@@ -95,21 +95,6 @@ func parseScanFlags(args []string) (scanOptions, error) {
 	return opts, nil
 }
 
-func splitPaths(raw string) []string {
-	if raw == "" {
-		return nil
-	}
-	parts := strings.Split(raw, ",")
-	out := make([]string, 0, len(parts))
-	for _, p := range parts {
-		p = strings.TrimSpace(p)
-		if p != "" {
-			out = append(out, p)
-		}
-	}
-	return out
-}
-
 func runScan(args []string) error {
 	opts, err := parseScanFlags(args)
 	if err != nil {
@@ -127,7 +112,7 @@ func runScan(args []string) error {
 	if err != nil {
 		return err
 	}
-	applyCLIExcludes(cc, splitPaths(opts.excludes))
+	delegatecli.ApplyExcludesToFilter(&cc.FileFilter, delegatecli.SplitPaths(opts.excludes))
 
 	// scan owns its own template (scan_template.json) independent from the
 	// diff-review template loaded by loadCommonContext above. Apply --max-tools
@@ -153,7 +138,7 @@ func runScan(args []string) error {
 		budget = int64(opts.maxTokensBudget)
 	}
 
-	scanPaths := splitPaths(opts.paths)
+	scanPaths := delegatecli.SplitPaths(opts.paths)
 
 	if opts.preview {
 		return runScanPreview(cc, scanTpl, scanPaths)

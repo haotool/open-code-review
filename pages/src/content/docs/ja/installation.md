@@ -4,21 +4,48 @@ sidebar:
   order: 4
 ---
 
+> **Delegate Edition（本 Fork）：** ソースから **`ocr-delegate`** をビルド — npm 不要、OCR 側に LLM API キー不要。完全な手順は [デリゲーションモード](../integrations/delegate/) を参照。
+
+## Delegate Edition — インストール
+
+### 前提条件
+
+- [Git ≥ 2.41](https://git-scm.com/)
+- [Go ≥ 1.25](https://go.dev/dl/)
+- [Make](https://www.gnu.org/software/make/)
+
+### ビルドと Skill インストール
+
+```bash
+git clone https://github.com/haotool/open-code-review-delegate.git && cd open-code-review-delegate
+make build
+export PATH="$PWD/dist:$PATH"
+make install-skill
+```
+
+確認：
+
+```bash
+ocr-delegate -h
+```
+
+レビューワークフローは [デリゲーションモード](../integrations/delegate/) を参照。
+
+---
+
+## 上流 `ocr` CLI（本 Fork では未提供）
+
+> 以下は **上流 [alibaba/open-code-review](https://github.com/alibaba/open-code-review)** のみに適用されます。
+
 `ocr` CLI をインストールするには、サポートされた 4 つの方法があります。
 
 ## NPM（推奨）
 
 #### インストール
 
-```bash
-npm install -g @alibaba-group/open-code-review
-```
+上流リポジトリからインストール — [上流インストール](https://github.com/alibaba/open-code-review#installation) を参照（npm グローバルパッケージ `@alibaba-group/open-code-review`）。
 
-特定のバージョンに固定：
-
-```bash
-npm install -g @alibaba-group/open-code-review@<version>
-```
+特定バージョンに固定する場合も同じ上流ドキュメントを使用（パッケージ名 `@alibaba-group/open-code-review@<version>`）。
 
 #### 更新
 

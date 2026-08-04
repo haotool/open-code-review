@@ -1,0 +1,15 @@
+# Files (1 reviewable / 2 total)
+
+- mode: workspace
+- background: <ocr_user_background>
+inline
+</ocr_user_background>
+
+<ocr_user_background>
+business requirement context
+</ocr_user_background>
+- total_insertions: 3
+- total_deletions: 0
+
+  - `main.go` [modified] +2/-0
+~~- `docs/context.md` [added] +1/-0 (excluded: unsupported_ext)~~

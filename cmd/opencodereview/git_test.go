@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/alibaba/open-code-review/internal/delegatecli"
 )
 
 func initTestGitRepo(t *testing.T) string {
@@ -138,7 +140,7 @@ func TestRequireGitRepo_Invalid(t *testing.T) {
 
 func TestValidateReviewRefs_ValidCommit(t *testing.T) {
 	dir := initTestGitRepo(t)
-	err := validateReviewRefs(dir, reviewOptions{commit: "HEAD"})
+	err := delegatecli.ValidateReviewRefs(dir, delegatecli.Options{Commit: "HEAD"})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -146,7 +148,7 @@ func TestValidateReviewRefs_ValidCommit(t *testing.T) {
 
 func TestValidateReviewRefs_InvalidCommit(t *testing.T) {
 	dir := initTestGitRepo(t)
-	err := validateReviewRefs(dir, reviewOptions{commit: "nonexistent-ref-xyz"})
+	err := delegatecli.ValidateReviewRefs(dir, delegatecli.Options{Commit: "nonexistent-ref-xyz"})
 	if err == nil {
 		t.Fatal("expected error for invalid commit ref")
 	}
@@ -154,7 +156,7 @@ func TestValidateReviewRefs_InvalidCommit(t *testing.T) {
 
 func TestValidateReviewRefs_EmptySkipped(t *testing.T) {
 	dir := initTestGitRepo(t)
-	err := validateReviewRefs(dir, reviewOptions{})
+	err := delegatecli.ValidateReviewRefs(dir, delegatecli.Options{})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

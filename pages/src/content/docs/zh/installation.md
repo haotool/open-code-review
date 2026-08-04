@@ -4,21 +4,48 @@ sidebar:
   order: 4
 ---
 
+> **Delegate Edition（本 Fork）：** 从源码构建 **`ocr-delegate`** — 无 npm、OCR 端无需 LLM API Key。完整流程见 [委托模式](../integrations/delegate/)。
+
+## Delegate Edition — 安装
+
+### 前置条件
+
+- [Git ≥ 2.41](https://git-scm.com/)
+- [Go ≥ 1.25](https://go.dev/dl/)
+- [Make](https://www.gnu.org/software/make/)
+
+### 构建并安装 Skill
+
+```bash
+git clone https://github.com/haotool/open-code-review-delegate.git && cd open-code-review-delegate
+make build
+export PATH="$PWD/dist:$PATH"
+make install-skill
+```
+
+验证：
+
+```bash
+ocr-delegate -h
+```
+
+审查流程见 [委托模式](../integrations/delegate/)。
+
+---
+
+## 上游 `ocr` CLI（本 Fork 未提供）
+
+> 以下内容仅适用于 **上游 [alibaba/open-code-review](https://github.com/alibaba/open-code-review)**。
+
 安装 `ocr` CLI 有四种受支持的方式。
 
 ## NPM（推荐）
 
 #### 安装
 
-```bash
-npm install -g @alibaba-group/open-code-review
-```
+请在上游仓库安装 — 见 [上游安装说明](https://github.com/alibaba/open-code-review#installation)（npm 全局包 `@alibaba-group/open-code-review`）。
 
-固定到某个版本：
-
-```bash
-npm install -g @alibaba-group/open-code-review@<version>
-```
+固定版本请使用同一上游文档（包名 `@alibaba-group/open-code-review@<version>`）。
 
 #### 更新
 

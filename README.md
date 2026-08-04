@@ -1,192 +1,149 @@
 <div align="center">
-  <a href="https://open-codereview.ai">
-    <img src="imgs/logo-core.svg" alt="OpenCodeReview logo" width="180" />
-  </a>
-  <h1>OpenCodeReview</h1>
+  <h1>Open Code Review — Delegate Edition</h1>
+  <p><strong>A security-hardened fork by <a href="https://github.com/haotool">haotool</a></strong></p>
 </div>
 
 <p align="center">
-  <a href="https://trendshift.io/repositories/41087?utm_source=repository-badge&amp;utm_medium=badge&amp;utm_campaign=badge-repository-41087" target="_blank" rel="noopener noreferrer">
-    <img src="https://trendshift.io/api/badge/repositories/41087" alt="alibaba%2Fopen-code-review | Trendshift" style="width: 280px; height: 60px;" width="280" height="60" />
-  </a>
-  <a href="https://trendshift.io/repositories/41087" target="_blank">
-    <img src="https://trendshift.io/api/badge/trendshift/repositories/41087/weekly?language=Go" alt="alibaba%2Fopen-code-review | Trendshift" style="width: 280px; height: 60px;" width="280" height="60" />
-  </a>
+  <a href="README.zh-CN.md">简体中文</a> · <a href="README.zh-TW.md">繁體中文</a> · <a href="README.ja-JP.md">日本語</a> · <a href="README.ko-KR.md">한국어</a> · <a href="README.ru-RU.md">Русский</a>
 </p>
+
 <p align="center">
-  <a href="https://www.npmjs.com/package/@alibaba-group/open-code-review"><img alt="npm" src="https://img.shields.io/npm/v/@alibaba-group/open-code-review?style=flat-square" /></a>
-  <a href="https://github.com/alibaba/open-code-review/actions/workflows/release.yml"><img alt="Build status" src="https://img.shields.io/github/actions/workflow/status/alibaba/open-code-review/release.yml?style=flat-square" /></a>
-  <a href="https://github.com/alibaba/open-code-review/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/github/license/alibaba/open-code-review?style=flat-square" /></a>
-  <a href="https://deepwiki.com/alibaba/open-code-review"><img alt="Ask DeepWiki" src="https://deepwiki.com/badge.svg" /></a>
-  <a href="https://www.bestpractices.dev/projects/13328"><img alt="OpenSSF Best Practices" src="https://img.shields.io/badge/OpenSSF-Silver-4C566A?style=flat-square" /></a>
-</p>
-<p align="center">
-  <a href="#supported-platforms"><img alt="Windows" src="https://img.shields.io/badge/Windows-supported-blue.svg" /></a>
-  <a href="#supported-platforms"><img alt="macOS" src="https://img.shields.io/badge/macOS-supported-blue.svg" /></a>
-  <a href="#supported-platforms"><img alt="Linux" src="https://img.shields.io/badge/Linux-supported-blue.svg" /></a>
-  <a href="#supported-agents"><img alt="Claude Code" src="https://img.shields.io/badge/Claude_Code-supported-blueviolet.svg" /></a>
-  <a href="#supported-agents"><img alt="Codex" src="https://img.shields.io/badge/Codex-supported-blueviolet.svg" /></a>
-  <a href="#supported-agents"><img alt="Cursor" src="https://img.shields.io/badge/Cursor-supported-blueviolet.svg" /></a>
-</p>
-<p align="center">
-  English | <a href="README.zh-CN.md">简体中文</a> | <a href="README.ja-JP.md">日本語</a> | <a href="README.ko-KR.md">한국어</a> | <a href="README.ru-RU.md">Русский</a>
+  <a href="https://github.com/haotool/open-code-review-delegate/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/haotool/open-code-review-delegate/ci.yml?style=flat-square" /></a>
+  <a href="LICENSE"><img alt="License" src="https://img.shields.io/github/license/haotool/open-code-review-delegate?style=flat-square" /></a>
+  <a href="https://github.com/alibaba/open-code-review"><img alt="Upstream" src="https://img.shields.io/badge/upstream-alibaba%2Fopen--code--review-blue?style=flat-square" /></a>
 </p>
 
 ---
 
-## What is Open Code Review?
+## Important Notice
 
-Open Code Review is an AI-powered code review CLI tool. It originated as Alibaba Group's internal official AI code review assistant — over the past two years, it has served tens of thousands of developers and identified millions of code defects. After thorough validation at massive scale, we incubated it into an open source project for the community. Simply configure a model endpoint to get started.
+This repository is **not** an official Alibaba product. It is an independent fork maintained by [haotool](https://github.com/haotool), derived from [alibaba/open-code-review](https://github.com/alibaba/open-code-review) under the Apache License 2.0.
 
-It reads Git diffs, sends changed files to a configurable LLM via an agent with tool-use capabilities, and generates structured review comments with line-level precision. The agent can read full file contents, search the codebase, inspect other changed files for context, and produce deep reviews — not just surface-level diff feedback. Beyond diff review, `ocr scan` reviews entire files for auditing unfamiliar codebases or directories that have no meaningful diff.
+- Repository: [`haotool/open-code-review-delegate`](https://github.com/haotool/open-code-review-delegate) (requests to the former `haotool/open-code-review` URL redirect automatically).
+- We do **not** use Alibaba trademarks or imply official endorsement.
+- See [NOTICE](NOTICE) for upstream copyright attribution and a summary of fork modifications.
+- See [LICENSE](LICENSE) for the full Apache-2.0 terms.
 
-Visit the [official website](https://open-codereview.ai) for more details.
+## What Is This?
 
-![Highlights](imgs/highlights-en.png)
+Open Code Review (Delegate Edition) ships a single CLI binary — **`ocr-delegate`** — that provides deterministic code-review engineering:
 
-## Benchmark
+- **File selection** — precisely determines which changed files need review
+- **Rule resolution** — matches review rules to each file from `rule.json`
+- **Zero network** — the binary never calls an LLM or opens outbound connections
+- **Zero credentials** — no API keys, tokens, or provider configuration required
 
-> Compared to general-purpose agents (Claude Code), Open Code Review achieves significantly higher **Precision** and **F1** with the same underlying model, while consuming only **~1/9 of the tokens** and completing reviews faster. Note that its Recall is lower than general-purpose agents — a deliberate trade-off favoring precision over noise.
+Your AI coding agent (Cursor, Claude Code, Codex, etc.) performs the actual review using its own subscription LLM. `ocr-delegate` handles the engineering; the host agent handles the intelligence.
 
-A real-world code review benchmark built from **50** popular open-source repositories, **200** real Pull Requests, and **10** programming languages — cross-validated by 80+ senior engineers (**1,505** annotated ground-truth issues).
+This design eliminates supply-chain risks from npm auto-updaters, prebuilt binary downloads, and embedded provider endpoints present in the upstream distribution model.
 
-| Metric | What it measures | Why it matters |
-|--------|-----------------|----------------|
-| **F1** | Harmonic mean of precision and recall | Best single number for overall review quality |
-| **Precision** | Proportion of reported issues that are real defects | Higher = fewer false alarms to triage |
-| **Recall** | Proportion of real defects that are found | Higher = fewer issues slip through review |
-| **Avg Time** | Wall-clock time per review | Matters for CI pipeline latency |
-| **Avg Token** | Total tokens consumed per review | Directly impacts API cost |
+## Quick Install (3 Steps)
 
-![Benchmark](imgs/benchmark-en.png)
-
-## Why Open Code Review?
-
-### The Problem with General-Purpose Agents
-
-If you've used general-purpose agents like Claude Code with Skills for code review, you've likely encountered these pain points:
-
-- **Incomplete coverage** — On larger changesets, agents tend to "cut corners," selectively reviewing only some files and missing others.
-- **Position drift** — Reported issues frequently don't match the actual code location, with line numbers or file references drifting off target.
-- **Unstable quality** — Natural-language-driven Skills are hard to debug, and review quality fluctuates significantly with minor prompt variations.
-
-The root cause: a purely language-driven architecture lacks hard constraints on the review process.
-
-### Core Design: Deterministic Engineering × Agent Hybrid
-
-Open Code Review's core philosophy is to combine deterministic engineering with an agent, each handling what it does best.
-
-**Deterministic Engineering — Hard Constraints**
-
-For review steps that *must not go wrong*, engineering logic — not the language model — guarantees correctness:
-
-- **Precise file selection** — Determines exactly which files need review and which should be filtered, ensuring no important change is missed.
-- **Smart file bundling** — Groups related files into a single review unit (e.g., `message_en.properties` and `message_zh.properties` are bundled together). Each bundle runs as a sub-agent with isolated context — a divide-and-conquer strategy that stays stable on very large changesets and naturally supports concurrent review.
-- **Fine-grained rule matching** — Matches review rules to each file's characteristics, keeping the model's attention sharply focused and eliminating information noise at the source. Compared to purely language-driven rule guidance, template-engine-based rule matching is more stable and predictable.
-- **External positioning and reflection modules** — Independent comment-positioning and comment-reflection modules systematically improve both the location accuracy and content accuracy of AI feedback.
-
-**Agent — Dynamic Decision-Making**
-
-The agent's strengths are concentrated where they matter most — dynamic decisions and dynamic context retrieval:
-
-- **Scenario-tuned prompts** — Prompt templates deeply optimized for code review, improving effectiveness while reducing token consumption.
-- **Scenario-tuned toolset** — Distilled from deep analysis of tool-call traces in large-scale production data — including call frequency distributions, per-tool repetition rates, and the impact of new tools on the overall call chain — resulting in a purpose-built toolset that is more stable and predictable for code review than a generic agent toolkit.
-
-## How to Use
-
-### Prerequisites
-
-- **Git >= 2.41** — Open Code Review relies on Git for diff generation, code search, and repository operations.
-
-### CLI
-
-#### Install
+Build from source — no npm, no prebuilt binaries, no API keys:
 
 ```bash
-npm install -g @alibaba-group/open-code-review
+# 1. Clone
+git clone https://github.com/haotool/open-code-review-delegate.git && cd open-code-review-delegate
+
+# 2. Build ocr-delegate
+make build
+
+# 3. Install the agent skill
+make install-skill
+# Claude Code users:
+make install-skill SKILL_DIR=~/.claude/skills
 ```
 
-After installation, the `ocr` command is available globally.
-
-For other installation methods (install script, GitHub Release binary, from source), see [Installation](https://open-codereview.ai/docs/installation).
-
-#### Quick Start
-
-**1. Configure LLM**
-
-You must configure an LLM before reviewing code, unless you use [Delegation Mode](https://open-codereview.ai/docs/delegate).
+Verify:
 
 ```bash
-ocr config provider          # Select a built-in provider or add a custom one
-ocr config model             # Pick a model for the active provider
+which ocr-delegate && ocr-delegate -h
 ```
 
-![Provider setup](imgs/providers.jpg)
+Installation verified by `test/e2e/dryrun.sh` (see [E2E verification](test/e2e/README.md)).
 
-The interactive UI guides you through provider selection, API key entry, and model configuration, then automatically tests connectivity.
+## Usage
 
-For CLI setup, environment variables, custom providers, and other advanced configuration, see [Configuration](https://open-codereview.ai/docs/configuration).
+The skill at `skills/open-code-review/SKILL.md` is the single source of truth for the delegation workflow. Summary:
 
-**2. Review**
+### 1. Preview — determine scope
 
 ```bash
-cd your-project
-
-# Workspace mode — review all staged, unstaged, and untracked changes
-ocr review
-
-# Branch range — compare two refs
-ocr review --from main --to feature-branch
-
-# Single commit
-ocr review --commit abc123
-
-# Resume an interrupted range or commit review
-ocr session list
-ocr review --from main --to feature-branch --resume <session-id>
-
-# Full-file scan — review whole files instead of a diff (no git history needed)
-ocr scan                          # scan the entire repository
-ocr scan --path internal/agent    # scan a directory or specific files
-
-# Delegation mode — let your AI coding agent perform the review itself
-# OCR handles file selection and rule resolution; no LLM configuration needed
-ocr delegate preview
-ocr delegate rule src/main.go src/handler.go
+ocr-delegate preview [--from main --to feature] [--commit <hash>] [-b "context"]
 ```
 
-## Documentation
+### 2. Get rules for files
 
-Full documentation lives at **[open-codereview.ai/docs](https://open-codereview.ai/docs)**:
+```bash
+ocr-delegate rule <path1> <path2> ...
+```
 
-- [Quickstart](https://open-codereview.ai/docs/quickstart) — install and run your first review
-- [Installation](https://open-codereview.ai/docs/installation) — all platforms and package managers
-- [CLI Reference](https://open-codereview.ai/docs/cli-reference) — every command and flag
-- [Review Rules](https://open-codereview.ai/docs/review-rules) — customize review rules with path filtering and targeting
-- [Configuration](https://open-codereview.ai/docs/configuration) — config keys and environment variables
-- [MCP Server](https://open-codereview.ai/docs/mcp) — extend the review agent with external tools
-- Coding Agent Integrations — choose the platform you use
-  - [Claude Code](plugins/open-code-review/README.md#claude-code) — install a plugin with review slash commands
-  - [Codex](plugins/open-code-review/README.md#codex) — install a plugin with callable review skills
-  - [Cursor](plugins/open-code-review/README.md#cursor) — install a plugin with portable review skills
-  - [OpenCode](plugins/open-code-review/opencode/README.md) — install native review tools and slash commands
-  - [Skill-compatible agents](https://open-codereview.ai/docs/agent-skill) — install the portable agent skill
-- Review Execution Modes — after integration, choose which LLM performs the review
-  - [Default (OCR-managed)](https://open-codereview.ai/docs/configuration) — OCR runs the review using its configured LLM
-  - [Delegation Mode](https://open-codereview.ai/docs/delegate) — your coding agent runs the review using its own LLM; no OCR API key required
-- [CI/CD Integration](https://open-codereview.ai/docs/cicd) — GitHub Actions, GitLab CI, GitFlic CI, and Gerrit integration
-- [Session Viewer](https://open-codereview.ai/docs/viewer) — browse and replay review sessions in browser
-- [Telemetry](https://open-codereview.ai/docs/telemetry) — OpenTelemetry integration for observability
-- [FAQ](https://open-codereview.ai/docs/faq) — common questions and troubleshooting
+### 3. Get diffs and review
 
-## Contributing
+Use git based on mode/ref metadata from preview output. The host agent reviews each file and produces structured findings.
 
-This project exists thanks to all the people who contribute. See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, coding guidelines, and how to submit pull requests.
+See the [skill documentation](skills/open-code-review/SKILL.md) for the complete workflow, security discipline (T7/T9), and output schema.
 
-<a href="https://github.com/alibaba/open-code-review/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=alibaba/open-code-review" />
-</a>
+See the [agent support matrix](docs/AGENT_SUPPORT.md) for the formally supported Codex, Claude Code, and Cursor installation paths.
 
-## License
+## Security Posture
 
-[Apache-2.0](LICENSE) — Copyright 2026 Alibaba
+| Property | Guarantee |
+|----------|-----------|
+| Zero outbound | `ocr-delegate` makes no network connections (verified by CI string scan + E2E) |
+| Zero credentials | No LLM provider config needed for delegate mode |
+| Minimal dependency closure | Forbidden modules (`internal/llm`, `telemetry`, `mcp`, `viewer`, `session`) excluded from binary |
+| Source-first distribution | No npm wrapper, no prebuilt binary downloads, no auto-updater |
+| Supply-chain stripped | Upstream install scripts, npm packages, and GitHub Action removed |
+
+Full details: [SECURITY.md](SECURITY.md)
+
+## Build Reproduction & Verification
+
+This fork is **source-first**: releases do not ship prebuilt binaries. Reproduce locally and verify integrity yourself:
+
+```bash
+make build                          # produces dist/ocr-delegate
+shasum -a 256 dist/ocr-delegate     # local checksum for your build
+
+# Cross-platform local builds (optional)
+make dist                           # builds all platforms + sha256sum.txt
+```
+
+## Development
+
+```bash
+make build       # build ocr-delegate
+make test        # run test suite
+make check       # fmt + vet + mod tidy
+make coverage    # coverage report (80% threshold)
+```
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+## Upstream Legacy Directories
+
+The following directories are retained from upstream but **not maintained** in this fork:
+
+| Directory | Status |
+|-----------|--------|
+| `pages/` | Upstream landing page — not built or deployed by this fork |
+| `extensions/` | Upstream VS Code extension — requires full `ocr` CLI, not `ocr-delegate` |
+
+## License & Attribution
+
+Licensed under [Apache-2.0](LICENSE). Copyright notices for upstream Alibaba contributors are preserved in [NOTICE](NOTICE).
+
+This fork modifies upstream substantially. See [CHANGELOG.md](CHANGELOG.md) for v1.0.0 changes.
+
+## Release Checklist (S1–S7)
+
+| ID | Requirement | Verification |
+|----|-------------|--------------|
+| S1 | Zero outbound network | `test/e2e/dryrun.sh` + CI Gate 4 string scan |
+| S2 | Zero credentials | E2E dry-run + delegate-only binary |
+| S3 | Deterministic engine | 26-scenario golden equivalence suite |
+| S4 | Source-first + delegate-only skill | No npm/postinstall supply chain in install paths; skill references `ocr-delegate` only (not full `ocr` CLI or external LLM API) |
+| S5 | Install ≤3 steps | E2E dry-run three-step verification |
+| S6 | Test suite passes | CI Gate 2 (`go test ./...`) |
+| S7 | Injection resistance | Adversarial fixture library + E2E spot-checks |

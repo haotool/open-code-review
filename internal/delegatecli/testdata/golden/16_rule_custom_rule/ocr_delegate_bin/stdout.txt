@@ -1,0 +1,8 @@
+### Rule Group 1: custom / *.go
+
+Applies to:
+- handler.go
+
+#### Content
+
+Custom Go review rule for golden equivalence test.

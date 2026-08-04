@@ -4,21 +4,48 @@ sidebar:
   order: 4
 ---
 
+> **Delegate Edition (this fork):** Build **`ocr-delegate`** from source — no npm, no LLM API keys on the OCR side. See [Delegation Mode](../integrations/delegate/) for the full workflow.
+
+## Delegate Edition — install
+
+### Prerequisites
+
+- [Git ≥ 2.41](https://git-scm.com/)
+- [Go ≥ 1.25](https://go.dev/dl/)
+- [Make](https://www.gnu.org/software/make/)
+
+### Build and install the skill
+
+```bash
+git clone https://github.com/haotool/open-code-review-delegate.git && cd open-code-review-delegate
+make build
+export PATH="$PWD/dist:$PATH"
+make install-skill
+```
+
+Verify:
+
+```bash
+ocr-delegate -h
+```
+
+See [Delegation Mode](../integrations/delegate/) for the review workflow.
+
+---
+
+## Upstream `ocr` CLI (not shipped in this fork)
+
+> The following applies to **upstream [alibaba/open-code-review](https://github.com/alibaba/open-code-review)** only.
+
 There are four supported ways to install the `ocr` CLI.
 
 ## NPM (recommended)
 
 #### Install
 
-```bash
-npm install -g @alibaba-group/open-code-review
-```
+Install from the upstream repository — see [upstream Installation](https://github.com/alibaba/open-code-review#installation) (npm global package `@alibaba-group/open-code-review`).
 
-Pin a specific version:
-
-```bash
-npm install -g @alibaba-group/open-code-review@<version>
-```
+Pin a specific version using the same upstream install docs (package name `@alibaba-group/open-code-review@<version>`).
 
 #### Updating
 

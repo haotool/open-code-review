@@ -1,71 +1,53 @@
-# Coding agent plugins
+# Open Code Review — Plugin Pack (Delegate Edition)
 
-Open Code Review ships platform-specific integrations for Claude Code, Codex,
-and Cursor. Choose your platform below instead of adapting installation
-instructions written for a different agent.
+> **Fork notice:** This repository is maintained by [haotool](https://github.com/haotool), not Alibaba.
+> Plugins point at the **Delegate Edition** skill and `ocr-delegate` CLI — not upstream `ocr` + npm.
 
-All integrations require Git 2.41 or later. Install the `ocr` CLI first:
+## Layout
+
+| Path | Purpose |
+|------|---------|
+| `.claude-plugin/marketplace.json` | Local Codex/Claude marketplace catalog |
+| `skills/open-code-review/` | Complete bundled delegate skill; checked against the repo-root SSOT |
+| `skills/open-code-review-delegate/` | Complete bundled alias skill for legacy plugin IDs |
+| `.codex-plugin/plugin.json` | Codex plugin manifest |
+| `.cursor-plugin/plugin.json` | Cursor plugin manifest |
+| `claude-code/commands/delegate-review.md` | Claude slash command for delegate workflow |
+| `claude-code/skills/` | Complete Claude Code skill package |
+
+## Install (recommended)
+
+Build from source and install the skill — no npm:
 
 ```bash
-npm install -g @alibaba-group/open-code-review
-```
-
-Configure and test an OCR LLM before running a review, unless you plan to use
-[Delegation Mode](https://open-codereview.ai/docs/delegate):
-
-```bash
-ocr config provider
-ocr config model
-ocr llm test
+git clone https://github.com/haotool/open-code-review-delegate.git && cd open-code-review-delegate
+make build
+make install-skill
+# Claude Code:
+make install-skill SKILL_DIR=~/.claude/skills
 ```
 
 ## Claude Code
 
-Run these commands inside Claude Code:
+Copy or symlink `claude-code/` into your Claude plugin path, or use the repo-root skill directly.
 
-```text
-/plugin marketplace add alibaba/open-code-review
-/plugin install open-code-review@open-code-review
-```
+## Codex / Cursor
 
-This installs the `/open-code-review:review` and
-`/open-code-review:delegate-review` slash commands. See the
-[Claude Code guide](https://open-codereview.ai/docs/claude-code) for manual
-installation, usage, and behavior.
-
-## Codex
-
-Add this repository as a Codex marketplace, then start Codex:
+For Codex, add this checkout as a local marketplace and install the Delegate
+plugin:
 
 ```bash
-codex plugin marketplace add alibaba/open-code-review
-codex
+codex plugin marketplace add /path/to/open-code-review
+codex plugin add open-code-review-delegate-codex@open-code-review
 ```
 
-Open `/plugins`, install and enable **Open Code Review**, then start a new task.
-The plugin exposes callable review skills backed by the local `ocr` CLI. For
-example:
+For Cursor, install the plugin directory using its local plugin flow. The
+Codex and Cursor manifests point to the complete bundled skills; they do not
+depend on a checkout-relative repo-root file.
 
-```text
-@Open Code Review review my current changes
-@Open Code Review review this branch against main
-@Open Code Review review and fix high-confidence issues
-```
+See [the support matrix](../../docs/AGENT_SUPPORT.md) for the platform contract
+and the optional live host-agent smoke test.
 
-## Cursor
+## Upstream
 
-This repository includes a Cursor plugin manifest at
-[`.cursor-plugin/plugin.json`](.cursor-plugin/plugin.json). For a local manual
-installation, copy the entire `plugins/open-code-review/` directory to:
-
-```text
-~/.cursor/plugins/local/open-code-review/
-```
-
-Verify that the manifest is located at
-`~/.cursor/plugins/local/open-code-review/.cursor-plugin/plugin.json`, then
-restart Cursor or run **Developer: Reload Window**. The plugin provides the
-portable OCR review skills from the bundled `skills/` directory.
-
-See the [Cursor plugin documentation](https://cursor.com/docs/plugins) for
-plugin loading and management details.
+For the full `ocr` CLI + npm distribution, see [alibaba/open-code-review](https://github.com/alibaba/open-code-review).

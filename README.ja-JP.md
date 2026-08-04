@@ -1,192 +1,149 @@
 <div align="center">
-  <a href="https://open-codereview.ai">
-    <img src="imgs/logo-core.svg" alt="OpenCodeReview logo" width="180" />
-  </a>
-  <h1>OpenCodeReview</h1>
+  <h1>Open Code Review — Delegate Edition</h1>
+  <p><strong><a href="https://github.com/haotool">haotool</a> によるセキュリティ強化 Fork</strong></p>
 </div>
 
 <p align="center">
-  <a href="https://trendshift.io/repositories/41087?utm_source=repository-badge&amp;utm_medium=badge&amp;utm_campaign=badge-repository-41087" target="_blank" rel="noopener noreferrer">
-    <img src="https://trendshift.io/api/badge/repositories/41087" alt="alibaba%2Fopen-code-review | Trendshift" style="width: 280px; height: 60px;" width="280" height="60" />
-  </a>
-  <a href="https://trendshift.io/repositories/41087" target="_blank">
-    <img src="https://trendshift.io/api/badge/trendshift/repositories/41087/weekly?language=Go" alt="alibaba%2Fopen-code-review | Trendshift" style="width: 280px; height: 60px;" width="280" height="60" />
-  </a>
+  <a href="README.md">English</a> | <a href="README.zh-CN.md">简体中文</a> | <a href="README.zh-TW.md">繁體中文</a> | 日本語 | <a href="README.ko-KR.md">한국어</a> | <a href="README.ru-RU.md">Русский</a>
 </p>
+
 <p align="center">
-  <a href="https://www.npmjs.com/package/@alibaba-group/open-code-review"><img alt="npm" src="https://img.shields.io/npm/v/@alibaba-group/open-code-review?style=flat-square" /></a>
-  <a href="https://github.com/alibaba/open-code-review/actions/workflows/release.yml"><img alt="Build status" src="https://img.shields.io/github/actions/workflow/status/alibaba/open-code-review/release.yml?style=flat-square" /></a>
-  <a href="https://github.com/alibaba/open-code-review/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/github/license/alibaba/open-code-review?style=flat-square" /></a>
-  <a href="https://deepwiki.com/alibaba/open-code-review"><img alt="Ask DeepWiki" src="https://deepwiki.com/badge.svg" /></a>
-  <a href="https://www.bestpractices.dev/projects/13328"><img alt="OpenSSF Best Practices" src="https://img.shields.io/badge/OpenSSF-Silver-4C566A?style=flat-square" /></a>
-</p>
-<p align="center">
-  <a href="#supported-platforms"><img alt="Windows" src="https://img.shields.io/badge/Windows-supported-blue.svg" /></a>
-  <a href="#supported-platforms"><img alt="macOS" src="https://img.shields.io/badge/macOS-supported-blue.svg" /></a>
-  <a href="#supported-platforms"><img alt="Linux" src="https://img.shields.io/badge/Linux-supported-blue.svg" /></a>
-  <a href="#supported-agents"><img alt="Claude Code" src="https://img.shields.io/badge/Claude_Code-supported-blueviolet.svg" /></a>
-  <a href="#supported-agents"><img alt="Codex" src="https://img.shields.io/badge/Codex-supported-blueviolet.svg" /></a>
-  <a href="#supported-agents"><img alt="Cursor" src="https://img.shields.io/badge/Cursor-supported-blueviolet.svg" /></a>
-</p>
-<p align="center">
-  <a href="README.md">English</a> | <a href="README.zh-CN.md">简体中文</a> | 日本語 | <a href="README.ko-KR.md">한국어</a> | <a href="README.ru-RU.md">Русский</a>
+  <a href="https://github.com/haotool/open-code-review-delegate/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/haotool/open-code-review-delegate/ci.yml?style=flat-square" /></a>
+  <a href="LICENSE"><img alt="License" src="https://img.shields.io/github/license/haotool/open-code-review-delegate?style=flat-square" /></a>
+  <a href="https://github.com/alibaba/open-code-review"><img alt="Upstream" src="https://img.shields.io/badge/upstream-alibaba%2Fopen--code--review-blue?style=flat-square" /></a>
 </p>
 
 ---
 
-## Open Code Reviewとは？
+## 重要なお知らせ
 
-Open Code ReviewはAIを活用したコードレビューCLIツールです。もともとはAlibaba Group社内の公式AIコードレビューアシスタントとして誕生し、過去2年間で数万人の開発者にサービスを提供し、数百万件のコード欠陥を発見してきました。大規模な環境で徹底的に検証された後、コミュニティ向けのオープンソースプロジェクトとして公開されました。モデルのエンドポイントを設定するだけで使い始められます。
+本リポジトリは Alibaba 公式製品**ではありません**。[haotool](https://github.com/haotool) が Apache License 2.0 の下で独立維持する Fork で、[alibaba/open-code-review](https://github.com/alibaba/open-code-review) から派生しています。
 
-Gitのdiffを読み取り、変更されたファイルをツール利用機能を持つエージェント経由で設定可能なLLMに送信し、行レベルの精度で構造化されたレビューコメントを生成します。エージェントはファイル全体の内容を読み取り、コードベースを検索し、コンテキストのために他の変更ファイルを参照し、深いレビューを生成できます — 単なる表面的なdiffへのフィードバックではありません。diffレビュー以外にも、`ocr scan` はファイル全体をレビューできます。不慣れなコードベースの監査や、意味のあるdiffがないディレクトリの検査に便利です。
+- リポジトリ：[`haotool/open-code-review-delegate`](https://github.com/haotool/open-code-review-delegate)（旧 `haotool/open-code-review` URL は自動リダイレクトされます）。
+- Alibaba の商標は使用せず、公式の後押しを暗示しません。
+- upstream の著作権表示は [NOTICE](NOTICE) を参照してください。
+- ライセンス全文は [LICENSE](LICENSE) を参照してください。
 
-詳細は[公式サイト](https://open-codereview.ai)をご覧ください。
+## 概要
 
-![Highlights](imgs/highlights-ja.png)
+Open Code Review (Delegate Edition) は単一 CLI バイナリ **`ocr-delegate`** を提供し、決定論的なコードレビュー工学を担当します。
 
-## ベンチマーク
+- **ファイル選定** — レビュー対象の変更ファイルを正確に決定
+- **ルール解決** — `rule.json` からファイルごとのレビュールールをマッチ
+- **ゼロネットワーク** — バイナリは LLM 呼び出しや外向き接続を行わない
+- **ゼロ資格情報** — API キー、トークン、プロバイダー設定不要
 
-> 汎用エージェント（Claude Code）と比較して、Open Code Reviewは同じ基盤モデルで有意に高い**精度（Precision）**と**F1スコア**を達成し、トークン消費量は**約1/9**にとどまり、レビューもより高速です。ただし、リコール（Recall）は汎用エージェントより低くなります——これはノイズを抑え精度を優先する設計上のトレードオフです。
+AI コーディングエージェント（Cursor、Claude Code、Codex 等）がサブスクリプション LLM で実際のレビューを実行します。`ocr-delegate` が工学、Host Agent が知能を担当します。
 
-実際のコードレビューに基づくベンチマーク。**50**の人気オープンソースリポジトリから**200**の実際のPull Requestを厳選し、**10**のプログラミング言語をカバー——80人以上のシニアエンジニアによるクロスバリデーション（**1,505**件のアノテーション済み欠陥）。
+upstream 配布モデルの npm 自動更新、プリビルトバイナリのダウンロード、組み込みプロバイダーエンドポイントによるサプライチェーンリスクを排除します。
 
-| 指標 | 測定内容 | 重要性 |
-|------|----------|--------|
-| **F1** | 精度とリコールの調和平均 | レビュー品質を示す最良の単一指標 |
-| **精度 (Precision)** | 報告された問題のうち実際の欠陥の割合 | 高い = 確認すべき偽陽性が少ない |
-| **リコール (Recall)** | 実際の欠陥のうち発見された割合 | 高い = 見逃しが少ない |
-| **平均時間 (Avg Time)** | レビューあたりの実時間 | CIパイプラインの待機時間に影響 |
-| **平均トークン (Avg Token)** | レビューあたりの総トークン消費量 | APIコストに直接影響 |
+## クイックインストール（3 ステップ）
 
-![Benchmark](imgs/benchmark-ja.png)
+ソースからビルド — npm、プリビルト、API キー不要：
 
-## なぜOpen Code Reviewなのか？
+```bash
+# 1. Clone
+git clone https://github.com/haotool/open-code-review-delegate.git && cd open-code-review-delegate
 
-### 汎用エージェントの問題点
+# 2. ocr-delegate をビルド
+make build
 
-Claude CodeのSkillsのような汎用エージェントをコードレビューに使ったことがあれば、次のような課題に直面したことがあるはずです：
+# 3. エージェント skill をインストール
+make install-skill
+# Claude Code ユーザー:
+make install-skill SKILL_DIR=~/.claude/skills
+```
 
-- **不完全なカバレッジ** — 大きな変更セットでは、エージェントが「手を抜き」、一部のファイルだけを選択的にレビューして他を見落としがちです。
-- **位置のずれ** — 報告された問題が実際のコード位置と一致せず、行番号やファイル参照がターゲットからずれることが頻繁にあります。
-- **不安定な品質** — 自然言語駆動のSkillsはデバッグが難しく、わずかなプロンプトの違いでレビュー品質が大きく変動します。
+検証:
 
-根本原因は、純粋に言語駆動のアーキテクチャにはレビュープロセスに対するハードな制約が欠けていることです。
+```bash
+which ocr-delegate && ocr-delegate -h
+```
 
-### コア設計: 決定論的エンジニアリング × エージェントのハイブリッド
-
-Open Code Reviewのコア哲学は、決定論的エンジニアリングとエージェントを組み合わせ、それぞれが得意とする領域を担当させることです。
-
-**決定論的エンジニアリング — ハードな制約**
-
-*絶対に間違えてはならない*レビューステップについては、言語モデルではなくエンジニアリングロジックが正しさを保証します：
-
-- **正確なファイル選択** — どのファイルをレビューし、どのファイルをフィルタリングすべきかを正確に決定し、重要な変更が見落とされないようにします。
-- **スマートなファイルバンドル** — 関連するファイルを単一のレビューユニットにグループ化します（例：`message_en.properties`と`message_zh.properties`はまとめてバンドルされます）。各バンドルは分離されたコンテキストを持つサブエージェントとして実行されます — 非常に大きな変更セットでも安定する分割統治戦略で、自然に並行レビューもサポートします。
-- **きめ細かなルールマッチング** — 各ファイルの特性に応じてレビュールールをマッチングし、モデルの注意を鋭く集中させ、情報ノイズを発生源から排除します。純粋に言語駆動のルール誘導と比べて、テンプレートエンジンベースのルールマッチングはより安定的で予測可能です。
-- **外部の位置特定・リフレクションモジュール** — 独立したコメント位置特定モジュールとコメントリフレクションモジュールにより、AIフィードバックの位置精度と内容精度の両方を体系的に向上させます。
-
-**エージェント — 動的な意思決定**
-
-エージェントの強みは、最も重要な領域 — 動的な意思決定と動的なコンテキスト取得 — に集中させています：
-
-- **シナリオに最適化されたプロンプト** — コードレビュー向けに深く最適化されたプロンプトテンプレートにより、効果を高めつつトークン消費を削減します。
-- **シナリオに最適化されたツールセット** — 大規模な本番データにおけるツール呼び出しトレースの詳細な分析 — 呼び出し頻度の分布、ツールごとの繰り返し率、新しいツールが呼び出しチェーン全体に与える影響など — から抽出された、汎用エージェントツールキットよりもコードレビューにおいて安定的で予測可能な専用ツールセットです。
+インストールは `test/e2e/dryrun.sh` で検証されます（[E2E 検証](test/e2e/README.md)）。
 
 ## 使い方
 
-### 前提条件
+`skills/open-code-review/SKILL.md` がデリゲートワークフローの単一の正（SSOT）です。
 
-- **Git >= 2.41** — Open Code Review は diff 生成、コード検索、リポジトリ操作に Git を利用します。
-
-### CLI
-
-#### インストール
+### 1. Preview — スコープ決定
 
 ```bash
-npm install -g @alibaba-group/open-code-review
+ocr-delegate preview [--from main --to feature] [--commit <hash>] [-b "context"]
 ```
 
-インストール後、`ocr`コマンドがグローバルに利用可能になります。
-
-その他のインストール方法（インストールスクリプト、GitHub Release バイナリ、ソースビルド）については、[インストールガイド](https://open-codereview.ai/docs/installation)を参照してください。
-
-#### クイックスタート
-
-**1. LLMの設定**
-
-コードレビューの前にLLMの設定が必要です。[デリゲートモード](https://open-codereview.ai/docs/delegate)を使用する場合は不要です。
+### 2. ファイルのルール取得
 
 ```bash
-ocr config provider          # ビルトインプロバイダーを選択またはカスタムプロバイダーを追加
-ocr config model             # アクティブなプロバイダーのモデルを選択
+ocr-delegate rule <path1> <path2> ...
 ```
 
-![Provider setup](imgs/providers.jpg)
+### 3. diff 取得とレビュー
 
-対話的UIがプロバイダーの選択、APIキーの入力、モデル設定をガイドし、完了後に自動的に接続テストを行います。
+preview 出力の mode/ref メタデータに従い git を使用。Host Agent が構造化 findings を生成します。
 
-CLIセットアップ、環境変数、カスタムプロバイダーなどの高度な設定については、[設定ガイド](https://open-codereview.ai/docs/configuration)を参照してください。
+完全なワークフロー、セキュリティ規律（T7/T9）、出力スキーマは [skill ドキュメント](skills/open-code-review/SKILL.md) を参照してください。
 
-**2. レビュー**
+Codex、Claude Code、Cursor の正式サポートインストールパスは [エージェントサポートマトリクス](docs/AGENT_SUPPORT.md) を参照してください。
+
+## セキュリティ posture
+
+| 属性 | 保証 |
+|------|------|
+| ゼロ外向き | ネットワーク接続なし（CI 文字列スキャン + E2E で検証） |
+| ゼロ資格情報 | Delegate モードで LLM プロバイダー設定不要 |
+| 最小依存クロージャ | 禁止モジュール（`internal/llm`、`telemetry`、`mcp`、`viewer`、`session`）を除外 |
+| ソース優先配布 | npm ラッパー、プリビルトダウンロード、自動更新なし |
+| サプライチェーン除去 | upstream インストールスクリプト、npm パッケージ、GitHub Action を削除 |
+
+詳細: [SECURITY.md](SECURITY.md)
+
+## ビルド再現と検証
+
+本 Fork は**ソース優先**で、プリビルトバイナリは配布しません。
 
 ```bash
-cd your-project
+make build                          # dist/ocr-delegate を生成
+shasum -a 256 dist/ocr-delegate     # ローカルチェックサム
 
-# ワークスペースモード — ステージ済み・未ステージ・未追跡のすべての変更をレビュー
-ocr review
-
-# ブランチ範囲 — 2つのrefを比較
-ocr review --from main --to feature-branch
-
-# 単一コミット
-ocr review --commit abc123
-
-# 中断した範囲または単一 commit レビューを再開
-ocr session list
-ocr review --from main --to feature-branch --resume <session-id>
-
-# フルファイルスキャン — diffではなくファイル全体をレビュー（git履歴不要）
-ocr scan                          # リポジトリ全体をスキャン
-ocr scan --path internal/agent    # ディレクトリまたは特定のファイルをスキャン
-
-# デリゲートモード — AI コーディングエージェントが自らレビューを実行
-# OCR はファイル選択とルール解決を担当。LLM 設定不要
-ocr delegate preview
-ocr delegate rule src/main.go src/handler.go
+# クロスプラットフォームローカルビルド（任意）
+make dist                           # 全プラットフォーム + sha256sum.txt
 ```
 
-## ドキュメント
+## 開発
 
-完全なドキュメントは **[open-codereview.ai/docs](https://open-codereview.ai/docs)** にあります：
+```bash
+make build       # ocr-delegate をビルド
+make test        # テストスイート実行
+make check       # fmt + vet + mod tidy
+make coverage    # カバレッジレポート（80% 閾値）
+```
 
-- [クイックスタート](https://open-codereview.ai/docs/quickstart) — インストールして最初のレビューを実行
-- [インストール](https://open-codereview.ai/docs/installation) — すべてのプラットフォームとパッケージマネージャー
-- [CLI リファレンス](https://open-codereview.ai/docs/cli-reference) — すべてのコマンドとフラグ
-- [レビュールール](https://open-codereview.ai/docs/review-rules) — レビュールールのカスタマイズ、パスフィルタリングとターゲティング
-- [設定](https://open-codereview.ai/docs/configuration) — 設定キーと環境変数
-- [MCP サーバー](https://open-codereview.ai/docs/mcp) — 外部ツールでレビューエージェントを拡張
-- コーディングエージェント連携 — 使用するプラットフォームを選択
-  - [Claude Code](plugins/open-code-review/README.md#claude-code) — レビュー用スラッシュコマンドを含むプラグインをインストール
-  - [Codex](plugins/open-code-review/README.md#codex) — 呼び出し可能なレビュースキルを含むプラグインをインストール
-  - [Cursor](plugins/open-code-review/README.md#cursor) — 移植可能なレビュースキルを含むプラグインをインストール
-  - [OpenCode](plugins/open-code-review/opencode/README.md) — ネイティブレビュー・ツールとスラッシュコマンドをインストール
-  - [Skill 対応エージェント](https://open-codereview.ai/docs/agent-skill) — 移植可能なエージェントスキルをインストール
-- レビュー実行モード — 連携後、どの LLM がレビューを実行するかを選択
-  - [デフォルト（OCR が管理）](https://open-codereview.ai/docs/configuration) — OCR が設定済みの LLM を使用してレビューを実行
-  - [デリゲートモード](https://open-codereview.ai/docs/delegate) — コーディングエージェントが自身の LLM を使用してレビューを実行。OCR の API キーは不要
-- [CI/CD 連携](https://open-codereview.ai/docs/cicd) — GitHub Actions、GitLab CI、GitFlic CI、Gerrit との統合
-- [セッションビューアー](https://open-codereview.ai/docs/viewer) — ブラウザでレビューセッションを閲覧・再生
-- [テレメトリー](https://open-codereview.ai/docs/telemetry) — 可観測性のためのOpenTelemetry統合
-- [FAQ](https://open-codereview.ai/docs/faq) — よくある質問とトラブルシューティング
+[CONTRIBUTING.ja-JP.md](CONTRIBUTING.ja-JP.md) を参照してください。
 
-## コントリビューション
+## 上流レガシーディレクトリ
 
-このプロジェクトは、貢献してくださるすべての方々のおかげで成り立っています。開発環境のセットアップ、コーディングガイドライン、プルリクエストの提出方法については[CONTRIBUTING.ja-JP.md](CONTRIBUTING.ja-JP.md)を参照してください。
+upstream から残存するが、本 Fork では**メンテナンスしない**ディレクトリ:
 
-<a href="https://github.com/alibaba/open-code-review/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=alibaba/open-code-review" />
-</a>
+| ディレクトリ | 状態 |
+|------|------|
+| `pages/` | upstream ランディング — 本 Fork ではビルド/デプロイしない |
+| `extensions/` | upstream VS Code 拡張 — `ocr-delegate` ではなく完全な `ocr` CLI が必要 |
 
-## ライセンス
+## ライセンスと帰属
 
-[Apache-2.0](LICENSE) — Copyright 2026 Alibaba
+[Apache-2.0](LICENSE)。upstream Alibaba 貢献者の著作権表示は [NOTICE](NOTICE) に保持されています。
+
+本 Fork は upstream を大幅に変更しています。v1.0.0 の変更は [CHANGELOG.md](CHANGELOG.md) を参照してください。
+
+## リリースチェックリスト (S1–S7)
+
+| ID | 要件 | 検証 |
+|----|------|------|
+| S1 | ゼロネットワーク | `test/e2e/dryrun.sh` + CI Gate 4 文字列スキャン |
+| S2 | ゼロ資格情報 | E2E dry-run + delegate 専用バイナリ |
+| S3 | 決定論エンジン | 26 シナリオ golden 等価スイート |
+| S4 | ソース優先 + delegate-only skill | インストール経路に npm/postinstall サプライチェーンなし；Skill は `ocr-delegate` のみ参照（完全な `ocr` CLI / 外部 LLM API 不可） |
+| S5 | インストール ≤3 ステップ | E2E dry-run 3 ステップ検証 |
+| S6 | テスト通過 | CI Gate 2 (`go test ./...`) |
+| S7 | 注入耐性 | 敵対 fixture ライブラリ + E2E spot-check |

@@ -4,114 +4,76 @@ sidebar:
   order: 1
 ---
 
-Register OCR as a callable skill so an agent framework can invoke it
-with the right flags, prerequisite checks, and triage rubric — without
-you re-deriving any of that on the calling side.
+> **Delegate Edition (this fork):** Install the skill with **`make install-skill`** after building **`ocr-delegate`** from source. See [Delegation Mode](../delegate/) for the canonical workflow.
 
-## What ships in the repo
+## Delegate Edition — agent skill
 
-The repo ships a SKILL manifest at
-[`skills/open-code-review/SKILL.md`](https://github.com/alibaba/open-code-review/blob/main/skills/open-code-review/SKILL.md).
-It declares OCR as a callable skill, with prerequisite checks, an
-invocation workflow, and a comment-triage rubric (High/Medium/Low).
+This fork ships a delegate-first SKILL at
+[`skills/open-code-review/SKILL.md`](https://github.com/haotool/open-code-review-delegate/blob/main/skills/open-code-review/SKILL.md).
+It uses **`ocr-delegate`** for file selection and rule resolution; your host agent
+performs the review with its subscription LLM.
 
-## Install
+### Prerequisites
 
-### Option 1: `npx skills add` (recommended)
+- **Git ≥ 2.41**
+- An AI coding agent with a subscription LLM (Cursor, Claude Code, Codex, etc.)
 
-Run from inside the project where you want the skill available:
-
-```bash
-npx skills add alibaba/open-code-review --skill open-code-review
-```
-
-This pulls the manifest from the
-[skills registry](https://github.com/alibaba/open-code-review/blob/main/skills/open-code-review/SKILL.md)
-and drops it into the project so any coding agent that respects the
-skills convention picks it up on the next invocation. Re-run the
-command to update the skill to the latest version.
-
-> **Prerequisite:** the skill will install the `ocr` CLI itself the
-> first time it runs (via `npm install -g @alibaba-group/open-code-review`)
-> if the binary isn't on `PATH` — see [What the skill does](#what-the-skill-does)
-> below. You **do** need an LLM configured up front; the skill cannot
-> do that for you and will stop and ask. See [Configuration](../../configuration/).
-
-### Option 2: Manual copy (system-wide)
-
-If you'd rather install the skill globally instead of per-project, copy
-the folder into your skills directory:
+### Install
 
 ```bash
-mkdir -p ~/.claude/skills
-cp -R /path/to/open-code-review/skills/open-code-review ~/.claude/skills/
+git clone https://github.com/haotool/open-code-review-delegate.git && cd open-code-review-delegate
+make build
+export PATH="$PWD/dist:$PATH"
+make install-skill
 ```
 
-This makes the skill available to every project on the machine.
+Verify:
 
-## What the skill does
-
-The SKILL.md is a prompt: when the calling agent loads it, the agent
-itself executes the steps. End-to-end, a single `/open-code-review`
-(or equivalent) request unfolds like this:
-
-1. **Prerequisite check.** Run `which ocr` to confirm the CLI is on
-   `PATH`, then `ocr llm test` to confirm an LLM is reachable.
-2. **Auto-install the CLI if missing.** If `which ocr` reports
-   "NOT INSTALLED", the agent runs
-   `npm install -g @alibaba-group/open-code-review` and continues. No
-   user prompt — this is treated as a routine setup step.
-3. **Stop and ask if no LLM is configured.** If `ocr llm test` fails,
-   the agent will *not* invent credentials. It shows the user the two
-   supported options (environment variables or `ocr config set …`) and
-   waits for the user to provide an API key.
-4. **Extract business context.** Inspect the review target (commits,
-   branch, working copy) and synthesise a short `--background` string.
-5. **Run the review.** Invoke
-   `ocr review --audience agent --background "…" [--commit | --from/--to]`,
-   picking flags based on whether the user asked to review the working
-   copy, a specific commit, or a branch range.
-6. **Classify and report.** Group the JSON comments into **High** /
-   **Medium** / **Low** using the rubric in SKILL.md (bugs and
-   security issues are High; nitpicks and likely false positives are
-   silently dropped), then render a Markdown summary.
-7. **Fix on request.** If the user said "review **and** fix" (or
-   similar), apply safe fixes to High/Medium items inline; otherwise
-   ask before touching the code.
-
-The full prompt — including the exact triage rubric, output template,
-and gotchas — lives in
-[`skills/open-code-review/SKILL.md`](https://github.com/alibaba/open-code-review/blob/main/skills/open-code-review/SKILL.md).
-Edit your local copy if you want to tighten any of the above (e.g.,
-flip the default to always-ask before fixing).
-
-## Anthropic Agent SDK
-
-Point your SDK init at the installed skill path:
-
-```python
-from anthropic_agent_sdk import Agent
-
-agent = Agent(
-    skill_paths=["/path/to/open-code-review/skills/open-code-review"],
-)
-
-agent.run("Review my staged changes — focus on race conditions.")
+```bash
+ocr-delegate -h
+which ocr-delegate
 ```
 
-The SDK loads the SKILL.md prompt and the agent executes the workflow
-described in [What the skill does](#what-the-skill-does) — including
-the `npm install` fallback and the prompt-for-credentials step if no
-LLM is configured.
+Claude Code users can target a custom skills directory:
 
-## Other agent frameworks
+```bash
+make install-skill SKILL_DIR=~/.claude/skills
+```
 
-Any framework with a "register external skill" surface can ingest the
-SKILL.md — it's just markdown with frontmatter. If your framework
-expects a different schema, the markdown body is still useful as a
-prompt template.
+### Workflow
+
+The skill drives a five-step loop — engineering scaffolding via `ocr-delegate`, reasoning via the host agent:
+
+1. **Preview** — `ocr-delegate preview` lists reviewable files plus mode/ref metadata.
+2. **Rules** — `ocr-delegate rule <paths…>` resolves review rules grouped by content.
+3. **Diffs** — use git based on preview mode/ref metadata (see [Delegation Mode](../delegate/)).
+4. **Review** — the host agent reviews each file with its subscription LLM.
+5. **Report** — classify findings (Critical/High/Medium/Low) per the skill schema.
+
+Example in any Git repository:
+
+```bash
+cd path/to/your-repo
+ocr-delegate preview -b "PR context"
+ocr-delegate rule internal/api/handler.go
+```
+
+Full flag reference and security discipline (T7/T9) live in the skill manifest and [Delegation Mode](../delegate/).
+
+### Plugin wrappers
+
+OpenCode, Claude Code, and Codex plugin entry points under `plugins/open-code-review/` point at the same skill. See [Claude Code Plugin](../claude-code/) for slash-command usage.
 
 ## See Also
 
-- [Command（Claude Code Plugin）](../claude-code/) — the
-  slash-command flavor of the same skill.
+- [Delegation Mode](../delegate/) — primary workflow for this fork.
+- [QuickStart](../../quickstart/) — build, install-skill, first preview.
+- [Installation](../../installation/) — prerequisites and skill install paths.
+
+---
+
+## Upstream agent skill (not shipped in this fork)
+
+> The following applies to **upstream [alibaba/open-code-review](https://github.com/alibaba/open-code-review)** only.
+
+Upstream ships a self-contained skill that invokes the full `ocr` CLI (including automatic npm-based CLI install on first run). See the upstream repository for `npx skills add`, Anthropic Agent SDK integration, and the embedded LLM review workflow.

@@ -19,6 +19,7 @@ import (
 	"github.com/alibaba/open-code-review/internal/llm"
 	"github.com/alibaba/open-code-review/internal/llmloop"
 	"github.com/alibaba/open-code-review/internal/model"
+	"github.com/alibaba/open-code-review/internal/preview"
 	"github.com/alibaba/open-code-review/internal/session"
 	"github.com/alibaba/open-code-review/internal/stdout"
 	"github.com/alibaba/open-code-review/internal/telemetry"
@@ -856,15 +857,7 @@ func (a *Agent) filterDiffs(diffs []model.Diff) []model.Diff {
 
 // extFromPath returns the file extension with leading dot, lowercased.
 func (a *Agent) extFromPath(path string) string {
-	basename := path
-	if idx := strings.LastIndex(path, "/"); idx >= 0 {
-		basename = path[idx+1:]
-	}
-	dot := strings.LastIndex(basename, ".")
-	if dot <= 0 {
-		return ""
-	}
-	return strings.ToLower(basename[dot:])
+	return preview.ExtFromPath(path)
 }
 
 // executePlanPhase runs the plan task for a single file, sending template messages

@@ -180,19 +180,6 @@ func loadLLMRuntime(tpl *template.Template, toolConfigPath, modelOverride string
 	}, nil
 }
 
-// applyCLIExcludes appends user-supplied --exclude patterns (already split
-// into a []string) onto cc.FileFilter.Exclude. Creates the FileFilter if
-// none was returned by rule.json layers. Idempotent on empty input.
-func applyCLIExcludes(cc *commonContext, patterns []string) {
-	if len(patterns) == 0 {
-		return
-	}
-	if cc.FileFilter == nil {
-		cc.FileFilter = &rules.FileFilter{}
-	}
-	cc.FileFilter.Exclude = append(cc.FileFilter.Exclude, patterns...)
-}
-
 // excludeToolDef returns a copy of defs with any entries whose function name
 // matches name removed. Used by `ocr scan` to hide tools that don't make
 // sense in full-scan mode (e.g. file_read_diff).

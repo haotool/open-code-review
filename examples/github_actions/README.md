@@ -1,10 +1,18 @@
 # OpenCodeReview - GitHub Actions Workflow
 
-This directory provides a ready-to-use GitHub Actions workflow demo that integrates OpenCodeReview into your repository to automatically review Pull Requests and post inline review comments. Copy it into `.github/workflows/` and configure the required secrets/vars.
+> **Fork notice (haotool Delegate Edition):** This directory documents the **upstream**
+> `alibaba/open-code-review` GitHub Action workflow, which sends PR diffs to an
+> external LLM. **It is not supported in this fork** — `action.yml` was removed
+> for anti-exfiltration. Use the [delegate skill](../../skills/open-code-review/SKILL.md)
+> with `ocr-delegate` locally or in your agent instead.
+
+The content below is retained for reference when comparing with upstream.
+
+---
 
 ## Quick Start: `ocr-review.yml`
 
-The simplest adoption path: this demo delegates every step — checkout, OCR install, review, comment posting, artifact upload — to the official reusable composite action at [`action.yml`](../../action.yml) via a single `uses: alibaba/open-code-review@main` step. It covers both automatic PR review (`pull_request_target: opened/synchronize/reopened`) and on-demand re-review via comments (`/open-code-review` or `@open-code-review`). No inline scripts to maintain — `@main` always runs the latest action; pin to a version tag or commit SHA when reproducibility matters.
+The simplest adoption path: this demo delegates every step — checkout, OCR install, review, comment posting, artifact upload — to the official reusable composite action at [upstream `action.yml`](https://github.com/alibaba/open-code-review/blob/main/action.yml) via a single `uses: alibaba/open-code-review@main` step. It covers both automatic PR review (`pull_request_target: opened/synchronize/reopened`) and on-demand re-review via comments (`/open-code-review` or `@open-code-review`). No inline scripts to maintain — `@main` always runs the latest action; pin to a version tag or commit SHA when reproducibility matters.
 
 ```bash
 mkdir -p .github/workflows
@@ -22,13 +30,13 @@ The core of the demo is a single action step:
     llm_use_anthropic: ${{ vars.OCR_LLM_USE_ANTHROPIC }}
 ```
 
-See [`action.yml`](../../action.yml) for the full list of inputs, outputs, security guidance, and the four comment-posting modes (sticky summary + incremental).
+See [upstream `action.yml`](https://github.com/alibaba/open-code-review/blob/main/action.yml) for the full list of inputs, outputs, security guidance, and the four comment-posting modes (sticky summary + incremental).
 
 ## Running on a self-hosted runner
 
 The demo above runs on GitHub-hosted runners (`runs-on: ubuntu-latest`) and pulls the action from `alibaba/open-code-review@main`. If you prefer to run OCR on your own self-hosted runner — to reach private network resources, keep LLM traffic on-prem, or avoid runner-minute costs — the OCR project itself does exactly this in its own CI.
 
-See [`.github/workflows/ocr-review.yml`](../../.github/workflows/ocr-review.yml) for that workflow. It runs on `runs-on: self-hosted` inside a `node:24` container. One important caveat: it invokes the action with `uses: ./` only because `action.yml` lives in that same repository — that is an internal shortcut and will not resolve in your repo. As an external user, keep `uses: alibaba/open-code-review@main` (the runner fetches the action automatically); only the runner environment needs to change. What is worth borrowing from it:
+See [upstream `.github/workflows/ocr-review.yml`](https://github.com/alibaba/open-code-review/blob/main/.github/workflows/ocr-review.yml) for that workflow. It runs on `runs-on: self-hosted` inside a `node:24` container. One important caveat: it invokes the action with `uses: ./` only because `action.yml` lives in that same repository — that is an internal shortcut and will not resolve in your repo. As an external user, keep `uses: alibaba/open-code-review@main` (the runner fetches the action automatically); only the runner environment needs to change. What is worth borrowing from it:
 
 - `runs-on: self-hosted`, optionally with a `container:` image such as `node:24` (the action needs Node.js; git is installed automatically if missing).
 - Marking the workspace as a trusted git `safe.directory` when running inside a container (e.g. `git config --global --replace-all safe.directory '*'`) to avoid "dubious ownership" errors. Use `--replace-all` (not `--add`) so repeated runs across multiple self-hosted actions replace rather than accumulate entries in the global git config.
@@ -75,7 +83,7 @@ Go to your repository's **Settings → Secrets and variables → Actions**.
 
 > These knobs are action inputs — they apply to the demo workflow and any workflow calling `alibaba/open-code-review@main`.
 
-See [`action.yml`](../../action.yml) for the full input list. Workflow-level settings (triggers, keywords) are edited in the workflow file itself.
+See [upstream `action.yml`](https://github.com/alibaba/open-code-review/blob/main/action.yml) for the full input list. Workflow-level settings (triggers, keywords) are edited in the workflow file itself.
 
 ### Change the trigger events
 

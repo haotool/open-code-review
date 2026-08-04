@@ -255,7 +255,7 @@ produces a regular empty array `[]` instead.
 ```
 
 The repo path is encoded by replacing `/` and `\` with `-` and `:` with
-`_` (e.g. `/Users/foo/my-repo` → `Users-foo-my-repo`). Browse sessions
+`_` (e.g. `/var/tmp/foo/my-repo` → `var-tmp-foo-my-repo`). Browse sessions
 with `ocr viewer`. Delete the directory to wipe history; OCR regenerates
 the encoded path on the next run.
 

@@ -5,6 +5,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/alibaba/open-code-review/internal/delegatecli"
 	"github.com/alibaba/open-code-review/internal/llm"
 )
 
@@ -54,9 +55,9 @@ func TestSplitPaths(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := splitPaths(tt.in)
+			got := delegatecli.SplitPaths(tt.in)
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("splitPaths(%q) = %v, want %v", tt.in, got, tt.want)
+				t.Errorf("SplitPaths(%q) = %v, want %v", tt.in, got, tt.want)
 			}
 		})
 	}
@@ -126,8 +127,8 @@ func TestParseScanFlags_PathNarrowsScope(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if got := splitPaths(opts.paths); !reflect.DeepEqual(got, []string{"internal/agent", "internal/diff"}) {
-		t.Errorf("splitPaths(opts.paths) = %v", got)
+	if got := delegatecli.SplitPaths(opts.paths); !reflect.DeepEqual(got, []string{"internal/agent", "internal/diff"}) {
+		t.Errorf("SplitPaths(opts.paths) = %v", got)
 	}
 }
 

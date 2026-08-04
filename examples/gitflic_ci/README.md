@@ -1,5 +1,7 @@
 # OpenCodeReview - GitFlic CI Demo
 
+> **Fork notice (haotool Delegate Edition):** This example installs OCR via **npm** and runs the upstream **`ocr review`** CLI against an external LLM. **It is not supported in this fork** — use the [delegate skill](../../skills/open-code-review/SKILL.md) with `ocr-delegate` locally or in your agent instead. The content below is retained for upstream reference.
+
 This demo shows how to integrate OpenCodeReview into a [GitFlic](https://gitflic.ru) CI/CD pipeline to automatically review Merge Requests and post the findings as MR discussions — inline on the changed lines where possible.
 
 Like the GitHub Actions and GitLab CI examples, the posting glue lives in the CI layer rather than in the `ocr` binary. Here it is a small, dependency-free Python script — [`post_review.py`](post_review.py) — that reads `ocr review --format json` and posts to the GitFlic Discussions API. The only GitFlic-specific wrinkle it handles is the **old-side line**: GitFlic requires it even for a comment on the new side of the diff, and `ocr review` reports new-side positions only, so the script recomputes it from the same merge-base diff the review ran on.

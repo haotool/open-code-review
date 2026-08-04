@@ -3,12 +3,12 @@ import { CliStatus } from '../configStore';
 import { LogViewer } from './LogViewer';
 import { useT } from '../I18nProvider';
 
-export const OCR_INSTALL_CMD = 'npm install -g @alibaba-group/open-code-review';
+export const OCR_INSTALL_CMD = 'make build && export PATH="$PWD/dist:$PATH"';
 
 const CHECK_ITEMS = [
   { key: 'node', label: 'Node.js' },
   { key: 'npm', label: 'npm' },
-  { key: 'ocr', label: 'ocr CLI' },
+  { key: 'ocr', label: 'ocr-delegate' },
 ] as const;
 
 interface Props {
@@ -112,7 +112,7 @@ export function EnvSetupGuide({
           hint={t('view.env.npmHint')}
         />
         <EnvTimelineItem
-          title="ocr CLI"
+          title="ocr-delegate"
           state={resolveStepState(ocrActive, false, envCheck?.ocr.ok)}
           version={envCheck?.ocr.version}
           command={OCR_INSTALL_CMD}

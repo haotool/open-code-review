@@ -171,23 +171,23 @@ describe('branchRefCandidates', () => {
 });
 
 describe('pickRepoRoot', () => {
-  const ws = '/Users/lost/tre/copilot-union/code-chat';
+  const ws = '/var/ws/copilot-union/code-chat';
 
   it('精确匹配 workspace 根优先(嵌套子仓库不漂移)', () => {
     // 子仓库 chat-ui 排在前面也应选中父 code-chat
-    const roots = ['/Users/lost/tre/copilot-union/code-chat/chat-ui', ws];
+    const roots = ['/var/ws/copilot-union/code-chat/chat-ui', ws];
     expect(pickRepoRoot(roots, ws)).toBe(ws);
   });
 
   it('无精确匹配时选 workspace 的祖先仓库', () => {
-    const parent = '/Users/lost/tre/copilot-union';
-    const roots = ['/Users/lost/tre/copilot-union/code-chat/chat-ui', parent];
+    const parent = '/var/ws/copilot-union';
+    const roots = ['/var/ws/copilot-union/code-chat/chat-ui', parent];
     expect(pickRepoRoot(roots, ws)).toBe(parent);
   });
 
   it('多个祖先时选最深(最长路径)的祖先', () => {
-    const grand = '/Users/lost/tre';
-    const parent = '/Users/lost/tre/copilot-union';
+    const grand = '/var/ws';
+    const parent = '/var/ws/copilot-union';
     const roots = [grand, parent];
     expect(pickRepoRoot(roots, ws)).toBe(parent);
   });

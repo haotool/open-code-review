@@ -1,0 +1,3 @@
+Usage: ocr-delegate rule [flags] <path...>
+
+Outputs resolved review rules grouped by content. Accepts multiple paths.

@@ -12,6 +12,7 @@ import (
 	"github.com/alibaba/open-code-review/internal/diff"
 	"github.com/alibaba/open-code-review/internal/llm"
 	"github.com/alibaba/open-code-review/internal/model"
+	"github.com/alibaba/open-code-review/internal/relocation"
 	"github.com/alibaba/open-code-review/internal/session"
 	"github.com/alibaba/open-code-review/internal/stdout"
 	"github.com/alibaba/open-code-review/internal/telemetry"
@@ -353,7 +354,7 @@ func (r *Runner) executeToolCall(ctx context.Context, newPath string, call llm.T
 				if d != nil {
 					if !diff.ResolveComment(cm, d) && r.deps.Template.ReLocationTask != nil {
 						rlStart := time.Now()
-						_, resp, msgs := diff.ReLocateComment(rctx, cm, d, r.deps.LLMClient, r.deps.Template.ReLocationTask, r.deps.Model, r.deps.Template.MaxTokens)
+						_, resp, msgs := relocation.ReLocateComment(rctx, cm, d, r.deps.LLMClient, r.deps.Template.ReLocationTask, r.deps.Model, r.deps.Template.MaxTokens)
 						if msgs != nil {
 							fs := r.deps.Session.GetOrCreateFileSession(cm.Path)
 							rlRec := fs.AppendTaskRecord(session.ReLocationTask, msgs)

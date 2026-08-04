@@ -6,14 +6,18 @@
 
 dist/
 npm/*/bin/
-.claude/plans
-.claude/settings.local.json
+.claude/
+.worktrees/
+product-intel/
+**/progress.json
+**/dispatch*.log
+test/e2e/last-run-report.txt
+coverage.out
 
 CLAUDE.md
 pages/package-lock.json
 scripts/hooks/
 scripts/publish/.env.internal
-CHANGELOG.md
 
 vendor/
 temp/

@@ -1,4 +1,7 @@
-# OpenCodeReview - GitHub Actions PR Auto-Review Demo
+# OpenCodeReview - GitHub Actions PR Auto-Review Demo (upstream only)
+#
+# Fork notice: haotool Delegate Edition removed action.yml. This workflow targets
+# alibaba/open-code-review@main — use ocr-delegate + skill locally in this fork.
 #
 # Demonstrates invoking the reusable action for both automatic PR review
 # (pull_request_target: opened/synchronize/reopened) and on-demand re-review
@@ -11,7 +14,8 @@
 #   variable  OCR_LLM_USE_ANTHROPIC  'true' for Anthropic, 'false' for OpenAI-compatible
 #
 # For the full list of action inputs/outputs and the four comment-posting modes
-# (sticky / incremental), see action.yml at the repo root.
+# (sticky / incremental), see upstream action.yml:
+# https://github.com/alibaba/open-code-review/blob/main/action.yml
 
 name: OpenCodeReview PR Review
 

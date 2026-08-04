@@ -1,64 +1,80 @@
 # Security Policy
 
+## Fork Security Stance
+
+This project is a security-hardened fork of [alibaba/open-code-review](https://github.com/alibaba/open-code-review). The delivered artifact is a delegate-only binary `ocr-delegate`: a deterministic engine with zero outbound network capability. The only code exfiltration point is the host agent's subscription LLM (a user-informed choice).
+
+Threat identifiers (T1, T2, etc.) refer to the fork threat model documented below.
+
+### Key Guarantees
+
+1. **No npm wrapper or prebuilt download chain (T1)** — The upstream npm wrapper (`bin/ocr.js` with background `npm i -g` upgrades), postinstall prebuilt download chain (`scripts/install.js`, six-platform `npm/` packages), and `install.sh`/`install.ps1` download scripts have been removed. Only source builds (`go build -trimpath`) are supported; no prebuilt binaries are published or downloaded.
+
+2. **FileReader absolute-path defect: upstream code unchanged (T6)** — The upstream FileReader does not hard-reject absolute paths. Per the fork's derivative decision, this upstream code is not modified; the delivered `ocr-delegate` dependency closure excludes that path (delegate does not register the `file_read` tool). Closure is verified by CI Gate 3 (`go list -deps ./cmd/ocr-delegate`).
+
+3. **Telemetry, MCP, viewer, session excluded from delivery (T2/T4/T5)** — These modules and `internal/llm` (including LLM provider endpoint static tables) are not in the `ocr-delegate` dependency closure: no telemetry export, no listeners, no session JSONL persistence.
+
+4. **Upstream GitHub Action unsupported (T8)** — Upstream `action.yml` and `ocr-review.yml` workflow have been removed. This fork's release workflow does not build or upload prebuilt binaries.
+
+5. **Source-first distribution + delegate-only skill (S4)** — No npm wrapper, postinstall prebuilt download chain, or `@alibaba-group/open-code-review` install commands in canonical install paths. The agent skill references `ocr-delegate` only; it must not invoke the full `ocr review` CLI or configure external LLM API endpoints.
+
+6. **Injection resistance at skill boundary (T7)** — Prompt injection defense is enforced by the host agent following skill security discipline. Adversarial fixtures in `testdata/adversarial/` validate expected behavior.
+
+7. **Rule tampering detection (T9)** — Changes to `.opencodereview/rule.json` are flagged as high-priority review targets per skill workflow.
+
 ## Supported Versions
 
 | Version | Supported          |
 |---------|--------------------|
-| Latest  | :white_check_mark: |
-| < Latest | :x:               |
+| 1.0.x   | :white_check_mark: |
+| < 1.0   | :x:                |
 
-Only the latest released version receives security updates. Users are encouraged to upgrade promptly.
+Only the latest released version receives security updates.
 
 ## Reporting a Vulnerability
 
 **Please do NOT report security vulnerabilities through public GitHub issues.**
 
-Instead, use **GitHub Private Vulnerability Reporting** — go to the [Security Advisories](https://github.com/alibaba/open-code-review/security/advisories/new) page and submit a new advisory.
+Use **GitHub Private Vulnerability Reporting**: [Security Advisories](https://github.com/haotool/open-code-review-delegate/security/advisories/new)
 
 ### What to Include
 
-- A description of the vulnerability and its potential impact.
-- Step-by-step instructions to reproduce the issue.
-- Affected version(s).
-- Any suggested fix or mitigation, if available.
+- Description of the vulnerability and potential impact
+- Step-by-step reproduction instructions
+- Affected version(s)
+- Suggested fix or mitigation, if available
 
 ## Response Timeline
 
-- **Acknowledgment**: within **3 business days** of receiving your report.
-- **Initial Assessment**: within **7 business days**.
-- **Fix & Disclosure**: we aim to release a fix within **14 days** for confirmed critical or high-severity issues, coordinating disclosure with the reporter.
+- **Acknowledgment**: within 3 business days
+- **Initial Assessment**: within 7 business days
+- **Fix & Disclosure**: within 14 days for confirmed critical/high-severity issues
 
 ## Scope
 
-The following are in scope for security reports:
+**In scope:**
 
-- Remote code execution or command injection via crafted diffs, configs, or LLM responses.
-- Credential or API key leakage through logs, telemetry, or output files.
-- Path traversal allowing reads/writes outside the intended working directory.
-- Vulnerabilities in dependencies that are exploitable through this project.
+- Remote code execution or command injection via crafted diffs, configs, or LLM responses
+- Credential or API key leakage through logs, telemetry, or output files
+- Path traversal allowing reads/writes outside the intended working directory
+- Exploitable vulnerabilities in dependencies used by `ocr-delegate`
 
-Out of scope:
+**Out of scope:**
 
-- Issues in third-party LLM providers or APIs.
-- Denial-of-service attacks that require local access.
-- Social engineering attacks.
+- Issues in third-party LLM providers or APIs
+- Denial-of-service requiring local access
+- Social engineering attacks
+- Host agent behavior when not following skill security discipline
 
-## Release Signatures
+## Releases
 
-All release binaries and checksums are signed using [GitHub Artifact Attestations](https://docs.github.com/en/actions/security-for-github-actions/using-artifact-attestations/using-artifact-attestations-to-establish-provenance-for-builds) (Sigstore). Signatures are keyless — backed by GitHub Actions OIDC, with no long-lived private key. Version tags are signed with SSH keys via `git tag -s`.
-
-To verify a downloaded binary:
-
-```bash
-gh attestation verify opencodereview-linux-amd64 --repo alibaba/open-code-review
-```
-
-To verify a version tag:
+This fork uses source-first distribution. Obtain source from GitHub Releases and build locally:
 
 ```bash
-git tag -v v1.6.4
+make build
+shasum -a 256 dist/ocr-delegate
 ```
 
 ## Recognition
 
-We appreciate the security research community's efforts. Reporters who follow responsible disclosure will be credited in the release notes (unless they prefer to remain anonymous).
+We appreciate responsible disclosure. Reporters will be credited in release notes unless they prefer anonymity.

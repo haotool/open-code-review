@@ -1,0 +1,65 @@
+Open Code Review — Delegate Edition
+Copyright 2026 haotool contributors
+
+This product includes software developed by Alibaba Group and its contributors,
+originally distributed as open-code-review (https://github.com/alibaba/open-code-review)
+under the Apache License, Version 2.0.
+
+================================================================================
+UPSTREAM ATTRIBUTION
+================================================================================
+
+Copyright 2026 Alibaba Group
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+================================================================================
+FORK MODIFICATIONS (haotool/open-code-review-delegate)
+================================================================================
+
+This fork substantially modifies the upstream project. Major changes include:
+
+1. DELIVERY MODEL
+   - Ships `ocr-delegate` binary only (deterministic file selection + rule resolution)
+   - Removed npm wrapper, prebuilt binary download chain, install scripts, and auto-updater
+   - Source-first distribution; no prebuilt binaries published
+
+2. SECURITY HARDENING
+   - Zero outbound network capability in delivered binary
+   - Dependency closure excludes LLM providers, telemetry, MCP, viewer, and session modules
+   - Removed upstream GitHub Action and associated CI workflows
+   - Four-gate CI guard (build, test, closure check, string scan)
+
+3. DELEGATION ARCHITECTURE
+   - Host AI agent performs review using its own subscription LLM
+   - `ocr-delegate` provides deterministic engineering only
+   - Skill-based workflow (skills/open-code-review/SKILL.md) replaces npm plugin distribution
+
+4. TESTING
+   - 26-scenario golden equivalence suite for delegate CLI
+   - Adversarial regression fixture library (T7/T9)
+   - End-to-end dry-run verification script (test/e2e/)
+
+5. DOCUMENTATION
+   - README rewritten for fork positioning and Apache-2.0 compliance
+   - SECURITY.md documents fork-specific threat model
+   - Multilingual README/CONTRIBUTING variants rewritten with fork disclaimers (upstream product descriptions retained only where marked upstream-only)
+
+This is NOT an official Alibaba product. Alibaba trademarks are not used
+and no official endorsement is implied.
+
+Go module path remains `github.com/alibaba/open-code-review` to preserve
+import compatibility with upstream package structure. This is a deliberate
+decision documented in release notes; changing the module path would break
+all internal import paths and require a full rename with no user benefit
+for a source-first fork where consumers build from this repository directly.

@@ -1,0 +1,8 @@
+# Files (1 reviewable / 2 total)
+
+- mode: workspace
+- total_insertions: 4
+- total_deletions: 0
+
+~~- `src/extra.go` [modified] +2/-0 (excluded: user_exclude)~~
+  - `src/keep.go` [modified] +2/-0

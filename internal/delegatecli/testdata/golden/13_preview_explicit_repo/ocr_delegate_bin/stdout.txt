@@ -1,0 +1,7 @@
+# Files (1 reviewable / 1 total)
+
+- mode: workspace
+- total_insertions: 1
+- total_deletions: 1
+
+  - `main.go` [modified] +1/-1
